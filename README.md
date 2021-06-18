@@ -51,9 +51,9 @@ Currently we support both nRF52810 and nRF52832. See keyboard directory for more
 
 ## Compile
 
-Firstly, you should download [nRF5 SDK 15.3](https://www.nordicsemi.com/Software-and-Tools/Software/nRF5-SDK/Download#infotabs), decompress it and put it into the SDK folder. The structure of SDK folder will be `SDK/components`, ...
+Firstly, you should download [nRF5 SDK 17.0.2](https://www.nordicsemi.com/Software-and-Tools/Software/nRF5-SDK/Download#infotabs), decompress it and put it into the SDK folder. The structure of SDK folder will be `SDK/components`, ...
 
-And then, install `gcc-arm-none-eabi-7-2018-q2-update`. Copy the `Makefile.posix.template` or `Makefile.windows.template` to `Makefile.posix` or `Makefile.windows` (depending your OS), then modify the toolchain path in the file to your gcc installed path.
+And then, install `gcc-arm-none-eabi-9-2019-q4-update`. Copy the `Makefile.posix.template` or `Makefile.windows.template` to `Makefile.posix` or `Makefile.windows` (depending your OS), then modify the toolchain path in the file to your gcc installed path.
 
 Install [SDCC](http://sdcc.sourceforge.net/) to compile code for CH554. Note: This project require SDCC 4.0 to compile, older version in ubuntu 18.04 and debian 10 will not work.
 
@@ -81,7 +81,7 @@ Type `make help` for all flashing command.
 
 ## 概述
 
-这是一个基于nrf52蓝牙键盘的固件，使用了nRF SDK 15.3作为底层硬件驱动，并使用TMK键盘库作为键盘功能的上部实现。
+这是一个基于nrf52蓝牙键盘的固件，使用了nRF SDK 17.0.2作为底层硬件驱动，并使用TMK键盘库作为键盘功能的上部实现。
 
 ## 目录结构
 - application/ 固件相关
@@ -126,8 +126,8 @@ Type `make help` for all flashing command.
 
 ## 编译
 
-首先下载 [nRF5 SDK 15.3](https://www.nordicsemi.com/Software-and-Tools/Software/nRF5-SDK/Download#infotabs), 解压并放入SDK文件夹。
-然后安装 gcc-arm-none-eabi-7-2018-q2-update，将template目录中对应平台的配置文件模板复制一份，重命名为`Makefile.posix`或`Makefile.windows`，修改里面工具路径为你的安装目录。
+首先下载 [nRF5 SDK 17.0.2](https://www.nordicsemi.com/Software-and-Tools/Software/nRF5-SDK/Download#infotabs), 解压并放入SDK文件夹。（本分支已经包含SDK，可略过此步）
+然后安装 gcc-arm-none-eabi-9-2019-q4-update，将template目录中对应平台的配置文件模板复制一份，重命名为`Makefile.posix`或`Makefile.windows`，修改里面工具路径为你的安装目录。
 
 然后安装 [SDCC](http://sdcc.sourceforge.net/) 用于编译CH554相关代码。注意：需要 SDCC 4.0 及以上版本才可编译，部分操作系统（如ubuntu 18.04, debian 10）内的 SDCC 版本无法满足要求。
 
@@ -149,6 +149,8 @@ make bootloader # 编译bootloader
 ```
 
 ### 硬件的烧录
+
+Windows下可直接下载我们制作的[烧录工具](http://glab.online/down/wch_nrf_burner_setup_1.1.0.2.exe)烧录nrf52及ch554
 
 对于nrf52，若要通过JLink直接写入，则需要安装JLink的驱动；若使用DAP-Link写入，则需要安装[pyocd](https://github.com/mbedmicro/pyOCD)；若使用蓝牙DFU进行升级，则需要安装[nrfutil](https://github.com/NordicSemiconductor/pc-nrfutil/)
 
