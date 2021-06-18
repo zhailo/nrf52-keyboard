@@ -1,6 +1,6 @@
 /*
 
-Copyright (c) 2009-2018 ARM Limited. All rights reserved.
+Copyright (c) 2009-2020 ARM Limited. All rights reserved.
 
     SPDX-License-Identifier: Apache-2.0
 
@@ -20,8 +20,8 @@ NOTICE: This file has been modified by Nordic Semiconductor ASA.
 
 */
 
-#ifndef SYSTEM_9160_H
-#define SYSTEM_9160_H
+#ifndef SYSTEM_NRF9160_H
+#define SYSTEM_NRF9160_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -49,7 +49,7 @@ extern void SystemInit (void);
  * @param  none
  * @return none
  *
- * @brief  Updates the SystemCoreClock with current core Clock 
+ * @brief  Updates the SystemCoreClock with current core Clock
  *         retrieved from cpu registers.
  */
 extern void SystemCoreClockUpdate (void);
@@ -58,4 +58,4 @@ extern void SystemCoreClockUpdate (void);
 }
 #endif
 
-#endif /* SYSTEM_9160_H */
+#endif /* SYSTEM_NRF9160_H */

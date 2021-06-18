@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 - 2019, Nordic Semiconductor ASA
+ * Copyright (c) 2017 - 2020, Nordic Semiconductor ASA
  *
  * All rights reserved.
  *
@@ -140,6 +140,7 @@ typedef struct {
                                              APP_USBD_HID_PROTO_MOUSE,      \
                                              report_buff_in,                \
                                              report_buff_out,               \
+                                             NULL,                          \
                                              user_ev_handler,               \
                                              &app_usbd_hid_mouse_methods,   \
                                              endpoint_list),                \

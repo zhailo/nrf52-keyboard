@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016 - 2019, Nordic Semiconductor ASA
+ * Copyright (c) 2016 - 2020, Nordic Semiconductor ASA
  *
  * All rights reserved.
  *
@@ -56,12 +56,11 @@ static void dfu_observer(nrf_dfu_evt_type_t event)
     switch (event)
     {
         case NRF_DFU_EVT_DFU_COMPLETED:
-        {
+        case NRF_DFU_EVT_DFU_ABORTED:
 #ifndef NRF_DFU_NO_TRANSPORT
             UNUSED_RETURN_VALUE(nrf_dfu_transports_close(NULL));
 #endif
             break;
-        }
         default:
             break;
     }

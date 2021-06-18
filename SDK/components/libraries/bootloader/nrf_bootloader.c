@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016 - 2019, Nordic Semiconductor ASA
+ * Copyright (c) 2016 - 2020, Nordic Semiconductor ASA
  *
  * All rights reserved.
  *
@@ -68,7 +68,9 @@ static volatile bool m_flash_write_done;
 #if !(defined(NRF_BL_DFU_ENTER_METHOD_BUTTON)    && \
       defined(NRF_BL_DFU_ENTER_METHOD_PINRESET)  && \
       defined(NRF_BL_DFU_ENTER_METHOD_GPREGRET)  && \
-      defined(NRF_BL_DFU_ENTER_METHOD_BUTTONLESS))
+      defined(NRF_BL_DFU_ENTER_METHOD_BUTTONLESS)&& \
+      defined(NRF_BL_RESET_DELAY_MS)             && \
+      defined(NRF_BL_DEBUG_PORT_DISABLE))
     #error Configuration file is missing flags. Update sdk_config.h.
 #endif
 
@@ -119,10 +121,7 @@ static void do_reset(void * p_context)
 
     NRF_LOG_FINAL_FLUSH();
 
-#if NRF_MODULE_ENABLED(NRF_LOG_BACKEND_RTT)
-    // To allow the buffer to be flushed by the host.
-    nrf_delay_ms(100);
-#endif
+    nrf_delay_ms(NRF_BL_RESET_DELAY_MS);
 
     NVIC_SystemReset();
 }
@@ -166,6 +165,10 @@ static void dfu_observer(nrf_dfu_evt_type_t evt_type)
         case NRF_DFU_EVT_DFU_COMPLETED:
         case NRF_DFU_EVT_DFU_ABORTED:
             bootloader_reset(true);
+            break;
+        case NRF_DFU_EVT_TRANSPORT_DEACTIVATED:
+            // Reset the internal state of the DFU settings to the last stored state.
+            nrf_dfu_settings_reinit();
             break;
         default:
             break;
@@ -220,6 +223,10 @@ static void loop_forever(void)
     }
 }
 
+#if NRF_BL_DFU_ENTER_METHOD_BUTTON
+#ifndef BUTTON_PULL
+    #error NRF_BL_DFU_ENTER_METHOD_BUTTON is enabled but not buttons seem to be available on the board.
+#endif
 /**@brief Function for initializing button used to enter DFU mode.
  */
 static void dfu_enter_button_init(void)
@@ -228,6 +235,7 @@ static void dfu_enter_button_init(void)
                              BUTTON_PULL,
                              NRF_GPIO_PIN_SENSE_LOW);
 }
+#endif
 
 
 static bool crc_on_valid_app_required(void)
@@ -425,10 +433,14 @@ ret_code_t nrf_bootloader_init(nrf_dfu_observer_t observer)
 
     m_user_observer = observer;
 
-    if (NRF_BL_DFU_ENTER_METHOD_BUTTON)
+    if (NRF_BL_DEBUG_PORT_DISABLE)
     {
-        dfu_enter_button_init();
+        nrf_bootloader_debug_port_disable();
     }
+
+#if NRF_BL_DFU_ENTER_METHOD_BUTTON
+    dfu_enter_button_init();
+#endif
 
     ret_val = nrf_dfu_settings_init(false);
     if (ret_val != NRF_SUCCESS)

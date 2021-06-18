@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2018 - 2019, Nordic Semiconductor ASA
+ * Copyright (c) 2018 - 2020, Nordic Semiconductor ASA
  *
  * All rights reserved.
  *
@@ -47,43 +47,44 @@
 #define NRFX_LOG_MODULE NFCT
 #include <nrfx_log.h>
 
-#if defined(NRF52832_XXAA) || defined(NRF52832_XXAB) || defined(NRF52840_XXAA)
+#if defined(NRF52832_XXAA) || defined(NRF52832_XXAB) || \
+    defined(NRF52833_XXAA) || defined(NRF52840_XXAA)
 #define USE_TIMER_WORKAROUND
 #endif
 
-#ifdef USE_TIMER_WORKAROUND
+#if defined(USE_TIMER_WORKAROUND)
 #include <nrfx_timer.h>
 
 typedef struct
 {
     const nrfx_timer_t timer;                     /**< Timer instance that supports the correct NFC field detection. */
-#ifdef NRF52840_XXAA
+#if defined(NRF52833_XXAA) || defined(NRF52840_XXAA)
     bool               fieldevents_filter_active; /**< Flag that indicates that the field events are ignored. */
     bool               is_hfclk_on;               /**< HFCLK has started - one of the NFC activation conditions. */
     bool               is_delayed;                /**< Required time delay has passed - one of the NFC activation conditions. */
 #else
     uint32_t           field_state_cnt;           /**< Counter of the FIELDLOST events. */
-#endif // NRF52840_XXAA
+#endif // defined(NRF52833_XXAA) || defined(NRF52840_XXAA)
 } nrfx_nfct_timer_workaround_t;
 
-#ifdef NRF52840_XXAA
+#if defined(NRF52833_XXAA) || defined(NRF52840_XXAA)
     #define NRFX_NFCT_ACTIVATE_DELAY     1000 /**< Minimal delay in us between NFC field detection and activation of NFCT. */
     #define NRFX_NFCT_TIMER_PERIOD       NRFX_NFCT_ACTIVATE_DELAY
 #else
     #define NRFX_NFCT_FIELDLOST_THR      7
     #define NRFX_NFCT_FIELD_TIMER_PERIOD 100  /**< Field polling period in us. */
     #define NRFX_NFCT_TIMER_PERIOD       NRFX_NFCT_FIELD_TIMER_PERIOD
-#endif // NRF52840_XXAA
+#endif // defined(NRF52833_XXAA) || defined(NRF52840_XXAA)
 #define NRFX_NFCT_TIMER_INSTANCE         4    /**< Timer instance used for various workarounds for the NFCT HW issues.*/
 
-static nrfx_nfct_timer_workaround_t m_timer_workaround = 
+static nrfx_nfct_timer_workaround_t m_timer_workaround =
 {
     .timer = NRFX_TIMER_INSTANCE(NRFX_NFCT_TIMER_INSTANCE),
 };
-#endif // USE_TIMER_WORKAROUND
+#endif // defined(USE_TIMER_WORKAROUND)
 
-#define NRFX_NFCT_FRAMEDELAYMAX_52840S (0xFFFFUL) /**< Bit mask of the FRAMEDELAYMAX field for the first sample of 52840.*/
-#define NRFX_NFCT_FWT_MAX_DIFF         1u         /**< The maximal difference between the requested FWT and HW-limited FWT settings.*/
+#define NRFX_NFCT_FWT_MAX_DIFF         1u             /**< The maximal difference between the requested FWT and HW-limited FWT settings.*/
+#define NFCT_FRAMEDELAYMAX_DEFAULT     (0x00001000UL) /**< Default value of the FRAMEDELAYMAX. */
 
 /* Mask of all possible interrupts that are relevant for data reception. */
 #define NRFX_NFCT_RX_INT_MASK (NRF_NFCT_INT_RXFRAMESTART_MASK | \
@@ -132,62 +133,13 @@ typedef enum
     NRFX_NFC_FIELD_STATE_UNKNOWN /**< Both NFCT field events have been set - ambiguous state. */
 } nrfx_nfct_field_state_t;
 
-#ifdef NRF52840_XXAA
-/**
- * @brief Internal auxiliary function for checking whether the program is running on the NRF52840 chip.
- *
- * @retval true  It is NRF52480 chip.
- * @retval false It is an other chip.
- */
-static inline bool nrfx_nfct_type_52840_check(void)
-{
-    return ((((*(uint32_t *)0xF0000FE0) & 0xFF) == 0x08) &&
-        (((*(uint32_t *)0xF0000FE4) & 0x0F) == 0x0));
-}
-
-/**
- * @brief Internal auxiliary function for checking whether the program is running on the first sample of
- *        the nRF52840 chip.
- *
- * @retval true  It is the nRF52480 chip and it is the first sample version.
- * @retval false It is an other chip.
- */
-static inline bool nrfx_nfct_type_52840_sample_check(void)
-{
-    return ( nrfx_nfct_type_52840_check() &&
-               ( ((*(uint32_t *)0xF0000FE8) & 0xF0) == 0x00 ) &&
-               ( ((*(uint32_t *)0xF0000FEC) & 0xF0) == 0x00 ) );
-}
-
-/**
- * @brief Internal auxiliary function for checking whether the program is running on the final version of
- *        the nRF52840 chip.
- *
- * @retval true  It is the nRF52480 chip and it is the final version.
- * @retval false It is an other chip.
- */
-static inline bool nrfx_nfct_type_52840_final_check(void)
-{
-    return ( nrfx_nfct_type_52840_check() &&
-              ( ( ((*(uint32_t *)0xF0000FE8) & 0xF0) != 0x00 ) ||
-                ( ((*(uint32_t *)0xF0000FEC) & 0xF0) != 0x00 ) ));
-}
-
-typedef struct
-{
-    bool eng_a;  /**< Engineering sample A of the NRF52840 chip. */
-    bool eng_bc; /**< Engineering sample B, C of the NRF52840 chip, or its final version. */
-} nrfx_nfct_nrf52840_ver_t;
-
-static nrfx_nfct_nrf52840_ver_t m_nrf52840;
-#endif // NRF52840_XXAA
-
 /**@brief NFCT control block. */
 typedef struct
 {
     nrfx_nfct_config_t config;
     nrfx_drv_state_t   state;
     volatile bool      field_on;
+    uint32_t           frame_delay_max;
 } nrfx_nfct_control_block_t;
 
 static nrfx_nfct_control_block_t m_nfct_cb;
@@ -197,28 +149,26 @@ static nrfx_nfct_control_block_t m_nfct_cb;
  */
 static void nrfx_nfct_hw_init_setup(void)
 {
-#ifdef NRF52840_XXAA
-    if (m_nrf52840.eng_a)
-    {
-        /* Begin: Bugfix for FTPAN-98 */
-        *(volatile uint32_t *) 0x4000568C = 0x00038148;
-        /* End: Bugfix for FTPAN-98 */
-        /* Begin: Bugfix for FTPAN-144 */
-        *(volatile uint32_t *) 0x4000561c = 0x01;
-        *(volatile uint32_t *) 0x4000562c = 0x3F;
-        *(volatile uint32_t *) 0x4000563c = 0x0;
-        /* End: Bugfix for FTPAN-144 */
-    }
-#endif // NRF52840_XXAA
-
     // Use Window Grid frame delay mode.
     nrf_nfct_frame_delay_mode_set(NRF_NFCT_FRAME_DELAY_MODE_WINDOWGRID);
 
-    /* Begin: Bugfix for FTPAN-25 (IC-9929) */
+    /* Begin: Workaround for anomaly 25 */
     /* Workaround for wrong SENSRES values require using SDD00001, but here SDD00100 is used
        because it is required to operate with Windows Phone */
     nrf_nfct_sensres_bit_frame_sdd_set(NRF_NFCT_SENSRES_BIT_FRAME_SDD_00100);
-    /* End: Bugfix for FTPAN-25 (IC-9929) */
+    /* End: Workaround for anomaly 25 */
+}
+
+static void nrfx_nfct_frame_delay_max_set(bool default_delay)
+{
+    if (default_delay)
+    {
+        nrf_nfct_frame_delay_max_set(NFCT_FRAMEDELAYMAX_DEFAULT);
+    }
+    else
+    {
+        nrf_nfct_frame_delay_max_set(m_nfct_cb.frame_delay_max);
+    }
 }
 
 /**@brief Function for evaluating and handling the NFC field events.
@@ -229,12 +179,12 @@ static void nrfx_nfct_field_event_handler(volatile nrfx_nfct_field_state_t field
 {
     nrfx_nfct_evt_t nfct_evt;
 
-#ifdef NRF52840_XXAA
-    if((!m_nrf52840.eng_a) && (m_timer_workaround.fieldevents_filter_active))
+#if defined(NRF52833_XXAA) || defined(NRF52840_XXAA)
+    if(m_timer_workaround.fieldevents_filter_active)
     {
         return;
     }
-#endif // NRF52840_XXAA
+#endif // defined(NRF52833_XXAA) || defined(NRF52840_XXAA)
 
     if (field_state == NRFX_NFC_FIELD_STATE_UNKNOWN)
     {
@@ -242,29 +192,28 @@ static void nrfx_nfct_field_event_handler(volatile nrfx_nfct_field_state_t field
         field_state = (nrfx_nfct_field_check()) ? NRFX_NFC_FIELD_STATE_ON : NRFX_NFC_FIELD_STATE_OFF;
     }
 
-    /* Field event service */
+    /* Field event service. Only take action on field transition -
+     * based on the value of m_nfct_cb.field_on
+     */
     switch (field_state)
     {
         case NRFX_NFC_FIELD_STATE_ON:
             if (!m_nfct_cb.field_on)
             {
-#ifdef NRF52840_XXAA
-                /* Begin: Bugfix for FTPAN-190 */
-                if (!m_nrf52840.eng_a)
-                {
-                    m_timer_workaround.is_hfclk_on               = false;
-                    m_timer_workaround.is_delayed                = false;
-                    m_timer_workaround.fieldevents_filter_active = true;
+#if defined(NRF52833_XXAA) || defined(NRF52840_XXAA)
+                /* Begin: Workaround for anomaly 190 */
+                m_timer_workaround.is_hfclk_on               = false;
+                m_timer_workaround.is_delayed                = false;
+                m_timer_workaround.fieldevents_filter_active = true;
 
-                    nrfx_timer_clear(&m_timer_workaround.timer);
-                    nrfx_timer_enable(&m_timer_workaround.timer);
-                }
-                /* END: Bugfix for FTPAN-190 */
+                nrfx_timer_clear(&m_timer_workaround.timer);
+                nrfx_timer_enable(&m_timer_workaround.timer);
+                /* End: Workaround for anomaly 190 */
 #elif defined(NRF52832_XXAA) || defined(NRF52832_XXAB)
                 nrfx_timer_clear(&m_timer_workaround.timer);
                 nrfx_timer_enable(&m_timer_workaround.timer);
                 m_timer_workaround.field_state_cnt = 0;  
-#endif // NRF52840_XXAA
+#endif // defined(NRF52833_XXAA) || defined(NRF52840_XXAA)
 
                 m_nfct_cb.field_on = true;
                 nfct_evt.evt_id    = NRFX_NFCT_EVT_FIELD_DETECTED;
@@ -273,20 +222,19 @@ static void nrfx_nfct_field_event_handler(volatile nrfx_nfct_field_state_t field
             break;
 
         case NRFX_NFC_FIELD_STATE_OFF:
-            nrfx_nfct_state_force(NRFX_NFCT_STATE_SENSING);
-#ifdef NRF52840_XXAA
-            /* Begin: Bugfix for FTPAN-116 (IC-12886) */
-            if (m_nrf52840.eng_a)
+            if (m_nfct_cb.field_on)
             {
-                *(volatile uint32_t *)0x40005010 = 1;
-            }
-            /* END: Bugfix for FTPAN-116 (IC-12886) */
-#endif // NRF52840_XXAA
-            nrf_nfct_int_disable(NRFX_NFCT_RX_INT_MASK | NRFX_NFCT_TX_INT_MASK);
-            m_nfct_cb.field_on = false;
-            nfct_evt.evt_id    = NRFX_NFCT_EVT_FIELD_LOST;
+                nrf_nfct_task_trigger(NRF_NFCT_TASK_SENSE);
+                nrf_nfct_int_disable(NRFX_NFCT_RX_INT_MASK | NRFX_NFCT_TX_INT_MASK);
+                m_nfct_cb.field_on = false;
+                nfct_evt.evt_id    = NRFX_NFCT_EVT_FIELD_LOST;
 
-            NRFX_NFCT_CB_HANDLE(m_nfct_cb.config.cb, nfct_evt);
+                /* Begin: Workaround for anomaly 218 */
+                nrfx_nfct_frame_delay_max_set(true);
+                /* End: Workaround for anomaly 218 */
+
+                NRFX_NFCT_CB_HANDLE(m_nfct_cb.config.cb, nfct_evt);
+            }
             break;
 
         default:
@@ -295,9 +243,9 @@ static void nrfx_nfct_field_event_handler(volatile nrfx_nfct_field_state_t field
     }
 }
 
-#ifdef USE_TIMER_WORKAROUND
+#if defined(USE_TIMER_WORKAROUND)
 
-#ifdef NRF52840_XXAA
+#if defined(NRF52833_XXAA) || defined(NRF52840_XXAA)
 static void nrfx_nfct_activate_check(void)
 {
     static bool is_field_validation_pending = false;
@@ -322,9 +270,10 @@ static void nrfx_nfct_activate_check(void)
         nrfx_timer_enable(&m_timer_workaround.timer);
     }
 }
-#endif // NRF52840_XXAA
+#endif // defined(NRF52833_XXAA) || defined(NRF52840_XXAA)
 
 #if defined(NRF52832_XXAA) || defined(NRF52832_XXAB)
+/* Begin: Workaround for anomaly 116 */
 static inline void nrfx_nfct_reset(void)
 {
     uint32_t                       fdm;
@@ -360,6 +309,7 @@ static inline void nrfx_nfct_reset(void)
 
     NRFX_LOG_INFO("Reinitialize");
 }
+/* End: Workaround for anomaly 116 */
 
 static void nrfx_nfct_field_poll(void)
 {
@@ -375,10 +325,14 @@ static void nrfx_nfct_field_poll(void)
             nrfx_timer_disable(&m_timer_workaround.timer);
             m_nfct_cb.field_on = false;
 
-            /* Begin: Bugfix for FTPAN-116 */
-            // resume the NFCT to initialized state
+            /* Begin: Workaround for anomaly 218 */
+            nrfx_nfct_frame_delay_max_set(true);
+            /* End: Workaround for anomaly 218 */
+
+            /* Begin: Workaround for anomaly 116 */
+            /* resume the NFCT to initialized state */
             nrfx_nfct_reset();
-            /* End: Bugfix for FTPAN-116 */
+            /* End: Workaround for anomaly 116 */
 
             NRFX_NFCT_CB_HANDLE(m_nfct_cb.config.cb, nfct_evt);
         }
@@ -398,20 +352,20 @@ static void nrfx_nfct_field_timer_handler(nrf_timer_event_t event_type, void * p
         return;
     }
 
-#ifdef NRF52840_XXAA
+#if defined(NRF52833_XXAA) || defined(NRF52840_XXAA)
     m_timer_workaround.is_delayed = true;
 
     nrfx_timer_disable(&m_timer_workaround.timer);
     nrfx_nfct_activate_check();
 #else
     nrfx_nfct_field_poll();
-#endif //NRF52840_XXAA
+#endif // defined(NRF52833_XXAA) || defined(NRF52840_XXAA)
 }
 
 static inline nrfx_err_t nrfx_nfct_field_timer_config(void)
 {
     nrfx_err_t          err_code;
-    nrfx_timer_config_t timer_cfg = 
+    nrfx_timer_config_t timer_cfg =
     {
         .frequency          = NRF_TIMER_FREQ_1MHz,
         .mode               = NRF_TIMER_MODE_TIMER,
@@ -432,8 +386,7 @@ static inline nrfx_err_t nrfx_nfct_field_timer_config(void)
                                 true);
     return err_code;
 }
-
-#endif // USE_TIMER_WORKAROUND
+#endif // defined(USE_TIMER_WORKAROUND)
 
 static inline nrf_nfct_sensres_nfcid1_size_t nrf_nfct_nfcid1_size_to_sensres_size(uint8_t nfcid1_size)
 {
@@ -469,11 +422,6 @@ nrfx_err_t nrfx_nfct_init(nrfx_nfct_config_t const * p_config)
         return NRFX_ERROR_INVALID_STATE;
     }
 
-#ifdef NRF52840_XXAA
-    m_nrf52840.eng_a  = nrfx_nfct_type_52840_sample_check();
-    m_nrf52840.eng_bc = nrfx_nfct_type_52840_final_check();
-#endif // NRF52840_XXAA
-
     m_nfct_cb.config = *p_config;
     nrfx_nfct_hw_init_setup();
 
@@ -481,15 +429,10 @@ nrfx_err_t nrfx_nfct_init(nrfx_nfct_config_t const * p_config)
     NRFX_IRQ_PRIORITY_SET(NFCT_IRQn, NRFX_NFCT_CONFIG_IRQ_PRIORITY);
     NRFX_IRQ_ENABLE(NFCT_IRQn);
 
-#ifdef USE_TIMER_WORKAROUND
+#if defined(USE_TIMER_WORKAROUND)
     /* Initialize Timer module as the workaround for NFCT HW issues. */
-    #ifdef NRF52840_XXAA
-    if (!m_nrf52840.eng_a)
-    #endif // NRF52840_XXAA
-    {
-        err_code = nrfx_nfct_field_timer_config();
-    }
-#endif // USE_TIMER_WORKAROUND
+    err_code = nrfx_nfct_field_timer_config();
+#endif // defined(USE_TIMER_WORKAROUND)
 
     if (err_code == NRFX_SUCCESS)
     {
@@ -503,7 +446,8 @@ nrfx_err_t nrfx_nfct_init(nrfx_nfct_config_t const * p_config)
         return err_code;
     }
 
-    m_nfct_cb.state = NRFX_DRV_STATE_INITIALIZED;
+    m_nfct_cb.state           = NRFX_DRV_STATE_INITIALIZED;
+    m_nfct_cb.frame_delay_max = NFCT_FRAMEDELAYMAX_DEFAULT;
 
     NRFX_LOG_INFO("Initialized");
     return err_code;
@@ -516,15 +460,10 @@ void nrfx_nfct_uninit(void)
     NRFX_IRQ_DISABLE(NFCT_IRQn);
     NRFX_IRQ_PENDING_CLEAR(NFCT_IRQn);
 
-#ifdef USE_TIMER_WORKAROUND
-    /* Initialize Timer module as the workaround for NFCT HW issues. */
-    #ifdef NRF52840_XXAA
-    if (!m_nrf52840.eng_a)
-    #endif // NRF52840_XXAA
-    {
-        nrfx_timer_uninit(&m_timer_workaround.timer);
-    }
-#endif // USE_TIMER_WORKAROUND
+#if defined(USE_TIMER_WORKAROUND)
+    /* De-initialize Timer module as the workaround for NFCT HW issues. */
+    nrfx_timer_uninit(&m_timer_workaround.timer);
+#endif // defined(USE_TIMER_WORKAROUND)
 
     m_nfct_cb.state = NRFX_DRV_STATE_UNINITIALIZED;
 }
@@ -538,7 +477,7 @@ void nrfx_nfct_enable(void)
                         NRF_NFCT_INT_SELECTED_MASK);
 #if !defined(NRF52832_XXAA) && !defined(NRF52832_XXAB)
     nrf_nfct_int_enable(NRF_NFCT_INT_FIELDLOST_MASK);
-#endif //!defined(NRF52832_XXAA) && !defined(NRF52832_XXAB)
+#endif // !defined(NRF52832_XXAA) && !defined(NRF52832_XXAB)
 
     NRFX_LOG_INFO("Start");
 }
@@ -558,7 +497,7 @@ bool nrfx_nfct_field_check(void)
     if (((field_state & NRF_NFCT_FIELD_STATE_PRESENT_MASK) == 0) &&
         ((field_state & NRF_NFCT_FIELD_STATE_LOCK_MASK) == 0))
     {
-        // Field is not active
+        /* Field is not active */
         return false;
     }
 
@@ -599,16 +538,16 @@ nrfx_err_t nrfx_nfct_tx(nrfx_nfct_data_desc_t const * p_tx_data,
 
 void nrfx_nfct_state_force(nrfx_nfct_state_t state)
 {
-#ifdef NRF52840_XXAA
-    if ((m_nrf52840.eng_bc) && (state == NRFX_NFCT_STATE_ACTIVATED))
+#if defined(NRF52833_XXAA) || defined(NRF52840_XXAA)
+    if (state == NRFX_NFCT_STATE_ACTIVATED)
     {
         m_timer_workaround.is_hfclk_on = true;
+        /* NFCT will be activated based on additional conditions */
         nrfx_nfct_activate_check();
+        return;
     }
-#endif
-    {
-        nrf_nfct_task_trigger((nrf_nfct_task_t) state);
-    }
+#endif // defined(NRF52833_XXAA) || defined(NRF52840_XXAA)
+    nrf_nfct_task_trigger((nrf_nfct_task_t) state);
 }
 
 void nrfx_nfct_init_substate_force(nrfx_nfct_active_state_t sub_state)
@@ -635,6 +574,10 @@ void nrfx_nfct_init_substate_force(nrfx_nfct_active_state_t sub_state)
         nrf_nfct_task_trigger((nrf_nfct_task_t) sub_state);
     }
 
+    /* Begin: Workaround for anomaly 218 */
+    nrfx_nfct_frame_delay_max_set(true);
+    /* End: Workaround for anomaly 218 */
+
     /* Disable TX/RX here (will be enabled at SELECTED) */
     nrf_nfct_int_disable(NRFX_NFCT_RX_INT_MASK | NRFX_NFCT_TX_INT_MASK);
 }
@@ -650,10 +593,6 @@ nrfx_err_t nrfx_nfct_parameter_set(nrfx_nfct_param_t const * p_param)
             uint32_t delay     = p_param->data.fdt;
             uint32_t delay_thr = NFCT_FRAMEDELAYMAX_FRAMEDELAYMAX_Msk;
 
-#ifdef NRF52840_XXAA
-            delay_thr = (m_nrf52840.eng_a) ? NRFX_NFCT_FRAMEDELAYMAX_52840S : delay_thr;
-#endif // NRF52840_XXAA
-
             // Delay validation.
             if (delay > (delay_thr + NRFX_NFCT_FWT_MAX_DIFF))
             {
@@ -661,7 +600,7 @@ nrfx_err_t nrfx_nfct_parameter_set(nrfx_nfct_param_t const * p_param)
             }
 
             delay = (delay > delay_thr) ? delay_thr : delay;
-            nrf_nfct_frame_delay_max_set(delay);
+            m_nfct_cb.frame_delay_max = delay;
             break;
         }
 
@@ -721,14 +660,14 @@ nrfx_err_t nrfx_nfct_nfcid1_default_bytes_get(uint8_t * const p_nfcid1_buff,
             p_nfcid1_buff[8] = (uint8_t) (nfc_tag_header2 >> 8);
             p_nfcid1_buff[9] = (uint8_t) (nfc_tag_header2 >> 16);
         }
-        /* Begin: Bugfix for FTPAN-181. */
-        /* Workaround for wrong value in NFCID1. Value 0x88 cannot be used as byte 3 
+        /* Begin: Workaround for anomaly 181. */
+        /* Workaround for wrong value in NFCID1. Value 0x88 cannot be used as byte 3
            of a double-size NFCID1, according to the NFC Forum Digital Protocol specification. */
         else if (p_nfcid1_buff[3] == 0x88)
         {
             p_nfcid1_buff[3] |= 0x11;
         }
-        /* End: Bugfix for FTPAN-181 */
+        /* End: Workaround for anomaly 181 */
     }
 
     return NRFX_SUCCESS;
@@ -768,7 +707,7 @@ void nrfx_nfct_irq_handler(void)
     if (NRFX_NFCT_EVT_ACTIVE(FIELDLOST))
     {
         nrf_nfct_event_clear(NRF_NFCT_EVENT_FIELDLOST);
-        current_field = (current_field == NRFX_NFC_FIELD_STATE_NONE) ? 
+        current_field = (current_field == NRFX_NFC_FIELD_STATE_NONE) ?
                         NRFX_NFC_FIELD_STATE_OFF : NRFX_NFC_FIELD_STATE_UNKNOWN;
 
         NRFX_LOG_DEBUG("Field lost");
@@ -841,6 +780,10 @@ void nrfx_nfct_irq_handler(void)
         nrf_nfct_event_clear(NRF_NFCT_EVENT_RXERROR);
         nrf_nfct_event_clear(NRF_NFCT_EVENT_TXFRAMESTART);
         nrf_nfct_event_clear(NRF_NFCT_EVENT_TXFRAMEEND);
+
+        /* Begin: Workaround for anomaly 218 */
+        nrfx_nfct_frame_delay_max_set(false);
+        /* End: Workaround for anomaly 218 */
 
         /* At this point any previous error status can be ignored. */
         nrf_nfct_rx_frame_status_clear(NRFX_NFCT_FRAME_STATUS_RX_ALL_MASK);

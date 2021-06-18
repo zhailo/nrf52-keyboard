@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 - 2019, Nordic Semiconductor ASA
+ * Copyright (c) 2017 - 2020, Nordic Semiconductor ASA
  *
  * All rights reserved.
  *
@@ -48,7 +48,9 @@ NRF_LOG_MODULE_REGISTER();
 
 #define NRF_SERIAL_OPCODE_SIZE (sizeof(uint8_t))
 
-
+#if defined(NRF_DFU_PROTOCOL_REDUCED) && NRF_DFU_PROTOCOL_REDUCED
+    #error Serial DFU (UART and USB) cannot function with the reduced protocol set.
+#endif
 
 static uint32_t response_ext_err_payload_add(uint8_t * p_buffer, uint32_t buf_offset)
 {
