@@ -171,7 +171,7 @@ CFLAGS += -DNRF52_PAN_74
 CFLAGS += -DNRFX_COREDEP_DELAY_US_LOOP_CYCLES=3
 CFLAGS += -DNRF_DFU_SETTINGS_VERSION=2
 CFLAGS += -DNRF_DFU_SVCI_ENABLED
-CFLAGS += -DNRF_SD_BLE_API_VERSION=6
+CFLAGS += -DNRF_SD_BLE_API_VERSION=7
 CFLAGS += -DSOFTDEVICE_PRESENT
 CFLAGS += -DSVC_INTERFACE_CALL_AS_NORMAL_FUNCTION
 CFLAGS += -DuECC_ENABLE_VLI_API=0
@@ -182,7 +182,6 @@ CFLAGS += -DuECC_VLI_NATIVE_LITTLE_ENDIAN=1
 CFLAGS += -mcpu=cortex-m4
 CFLAGS += -mthumb -mabi=aapcs
 CFLAGS += -Wall -Werror
-CFLAGS += -DUSE_CUSTOM_CONFIG
 # keep every function in a separate section, this allows linker to discard unused ones
 CFLAGS += -ffunction-sections -fdata-sections -fno-strict-aliasing
 CFLAGS += -fno-builtin -fshort-enums
@@ -204,7 +203,7 @@ ASMFLAGS += -DNRF52_PAN_74
 ASMFLAGS += -DNRFX_COREDEP_DELAY_US_LOOP_CYCLES=3
 ASMFLAGS += -DNRF_DFU_SETTINGS_VERSION=2
 ASMFLAGS += -DNRF_DFU_SVCI_ENABLED
-ASMFLAGS += -DNRF_SD_BLE_API_VERSION=6
+ASMFLAGS += -DNRF_SD_BLE_API_VERSION=7
 ASMFLAGS += -DSOFTDEVICE_PRESENT
 ASMFLAGS += -DSVC_INTERFACE_CALL_AS_NORMAL_FUNCTION
 ASMFLAGS += -DuECC_ENABLE_VLI_API=0
@@ -216,10 +215,11 @@ ASMFLAGS += -DuECC_VLI_NATIVE_LITTLE_ENDIAN=1
 ifeq ($(SOFTDEVICE), S112)
 	CFLAGS += -DS112
 	ASMFLAGS += -DS112
-	SOFTDEVICE_NAME := s112_nrf52_6.1.1_softdevice.hex
+	SOFTDEVICE_NAME := s112_nrf52_7.2.0_softdevice.hex
 	SOFTDEVICE_VER  := 0xb8
-	SOFTDEVICE_PATH := $(SDK_ROOT)/components/softdevice/s112/hex/s112_nrf52_6.1.1_softdevice.hex
-	
+ifndef SOFTDEVICE_PATH
+	SOFTDEVICE_PATH := $(SDK_ROOT)/components/softdevice/s112/hex/s112_nrf52_7.2.0_softdevice.hex
+endif
     INC_FOLDERS += \
 		$(SDK_ROOT)/components/softdevice/s112/headers/nrf52 \
 		$(SDK_ROOT)/components/softdevice/s112/headers
@@ -227,10 +227,11 @@ ifeq ($(SOFTDEVICE), S112)
 else ifeq ($(SOFTDEVICE), S132)
 	CFLAGS += -DS132
 	ASMFLAGS += -DS132
-	SOFTDEVICE_NAME := s132_nrf52_6.1.1_softdevice.hex
+	SOFTDEVICE_NAME := s112_nrf52_7.2.0_softdevice.hex
 	SOFTDEVICE_VER  := 0xb7
-	SOFTDEVICE_PATH := $(SDK_ROOT)/components/softdevice/s132/hex/s132_nrf52_6.1.1_softdevice.hex
-	
+ifndef SOFTDEVICE_PATH
+	SOFTDEVICE_PATH := $(SDK_ROOT)/components/softdevice/s132/hex/s132_nrf52_7.2.0_softdevice.hex
+endif
 	INC_FOLDERS += \
 		$(SDK_ROOT)/components/softdevice/s132/headers/nrf52 \
 		$(SDK_ROOT)/components/softdevice/s132/headers
@@ -304,6 +305,7 @@ merge_softdevice: default
 	@echo Merging program and SoftDevice $(SOFTDEVICE_NAME) to $(OUTPUT_DIRECTORY)/$(NRF_CHIP)_bootloader_sd.hex
 	mergehex -m $(SOFTDEVICE_PATH) $(OUTPUT_DIRECTORY)/$(NRF_CHIP)_bootloader.hex -o $(OUTPUT_DIRECTORY)/$(NRF_CHIP)_bootloader_sd.hex
 
+# Erase chip
 erase:
 	nrfjprog -f nrf52 --eraseall
 

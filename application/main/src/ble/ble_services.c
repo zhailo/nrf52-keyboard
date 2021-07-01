@@ -241,7 +241,7 @@ static void peer_list_find_and_delete_bond(void)
     peer_id = pm_next_peer_id_get(PM_PEER_ID_INVALID);
 
     while (peer_id != PM_PEER_ID_INVALID) {
-        uint16_t length = 8;
+        uint32_t length = 8;
         uint8_t addr[8];
 
         if (pm_peer_data_app_data_load(peer_id, addr, &length) == NRF_SUCCESS) {

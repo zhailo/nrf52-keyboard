@@ -42,8 +42,10 @@ SRC_FILES += \
 	$(SDK_ROOT)/components/libraries/util/app_error_handler_gcc.c \
 	$(SDK_ROOT)/components/libraries/util/app_error_weak.c \
 	$(SDK_ROOT)/components/libraries/scheduler/app_scheduler.c \
+  $(SDK_ROOT)/components/libraries/timer/app_timer2.c \
 	$(SDK_ROOT)/components/libraries/util/app_util_platform.c \
 	$(SDK_ROOT)/components/libraries/crc16/crc16.c \
+  $(SDK_ROOT)/components/libraries/timer/drv_rtc.c \
 	$(SDK_ROOT)/components/libraries/fds/fds.c \
 	$(SDK_ROOT)/components/libraries/hardfault/hardfault_implementation.c \
 	$(SDK_ROOT)/components/libraries/util/nrf_assert.c \
@@ -59,6 +61,7 @@ SRC_FILES += \
 	$(SDK_ROOT)/components/libraries/pwr_mgmt/nrf_pwr_mgmt.c \
 	$(SDK_ROOT)/components/libraries/ringbuf/nrf_ringbuf.c \
 	$(SDK_ROOT)/components/libraries/experimental_section_vars/nrf_section_iter.c \
+  $(SDK_ROOT)/components/libraries/sortlist/nrf_sortlist.c \
 	$(SDK_ROOT)/components/libraries/strerror/nrf_strerror.c \
 	$(SDK_ROOT)/components/libraries/bootloader/dfu/nrf_dfu_svci.c \
 	$(SDK_ROOT)/components/libraries/low_power_pwm/low_power_pwm.c \
@@ -155,7 +158,6 @@ INC_FOLDERS += \
 	$(SDK_ROOT)/components/libraries/hardfault \
 	$(SDK_ROOT)/components/libraries/hci \
 	$(SDK_ROOT)/components/libraries/timer \
-	$(SDK_ROOT)/components/libraries/timer/experimental \
 	$(SDK_ROOT)/components/libraries/uart \
 	$(SDK_ROOT)/components/libraries/fifo \
 	$(SDK_ROOT)/integration/nrfx \
@@ -188,19 +190,6 @@ INC_FOLDERS += \
 # Libraries common to all targets
 LIB_FILES += \
 
-# APP_TIMER_V2
-ifdef USE_APP_TIMER_V2
-	SRC_FILES += $(SDK_ROOT)/components/libraries/timer/experimental/app_timer2.c \
-				 $(SDK_ROOT)/components/libraries/timer/experimental/drv_rtc.c \
-				 $(SDK_ROOT)/components/libraries/sortlist/nrf_sortlist.c 
-	CFLAGS += -DAPP_TIMER_V2
-	CFLAGS += -DAPP_TIMER_V2_RTC1_ENABLED
-	ASMFLAGS += -DAPP_TIMER_V2
-	ASMFLAGS += -DAPP_TIMER_V2_RTC1_ENABLED
-else
-	SRC_FILES += $(SDK_ROOT)/components/libraries/timer/app_timer.c 
-endif
-
 # Optimization flags
 ifeq (yes,$(strip $(DEBUG)))
     OPT_DEFS += -DDEBUG
@@ -214,14 +203,15 @@ OPT += $(OPT_DEFS)
 
 # C flags common to all targets
 CFLAGS += $(OPT)
+CFLAGS += -DAPP_TIMER_V2
+CFLAGS += -DAPP_TIMER_V2_RTC1_ENABLED
 CFLAGS += -DNRF52_APP
 CFLAGS += -DNRF52_PAN_74
 CFLAGS += -DNRFX_COREDEP_DELAY_US_LOOP_CYCLES=3
 CFLAGS += -DNRF_DFU_SVCI_ENABLED
 CFLAGS += -DNRF_DFU_TRANSPORT_BLE=1
-CFLAGS += -DNRF_SD_BLE_API_VERSION=6
+CFLAGS += -DNRF_SD_BLE_API_VERSION=7
 CFLAGS += -DSOFTDEVICE_PRESENT
-CFLAGS += -DSWI_DISABLE0
 CFLAGS += -DUSE_CUSTOM_CONFIG
 CFLAGS += -mcpu=cortex-m4
 CFLAGS += -mthumb -mabi=aapcs
@@ -241,13 +231,14 @@ CXXFLAGS += $(OPT)
 ASMFLAGS += -g3
 ASMFLAGS += -mcpu=cortex-m4
 ASMFLAGS += -mthumb -mabi=aapcs
+ASMFLAGS += -DAPP_TIMER_V2
+ASMFLAGS += -DAPP_TIMER_V2_RTC1_ENABLED
 ASMFLAGS += -DNRF52_PAN_74
 ASMFLAGS += -DNRFX_COREDEP_DELAY_US_LOOP_CYCLES=3
 ASMFLAGS += -DNRF_DFU_SVCI_ENABLED
 ASMFLAGS += -DNRF_DFU_TRANSPORT_BLE=1
-ASMFLAGS += -DNRF_SD_BLE_API_VERSION=6
+ASMFLAGS += -DNRF_SD_BLE_API_VERSION=7
 ASMFLAGS += -DSOFTDEVICE_PRESENT
-ASMFLAGS += -DSWI_DISABLE0
 ASMFLAGS += -DUSE_CUSTOM_CONFIG
 ifdef CONFIG_H
 #    ASFLAGS += -include $(CONFIG_H)
@@ -256,10 +247,10 @@ endif
 ifeq ($(SOFTDEVICE), S112)
 	CFLAGS += -DS112
 	ASMFLAGS += -DS112
-	SOFTDEVICE_NAME := s112_nrf52_6.1.1_softdevice.hex
+	SOFTDEVICE_NAME := s112_nrf52_7.2.0_softdevice.hex
 	SOFTDEVICE_VER  := 0xb8
 ifndef SOFTDEVICE_PATH
-	SOFTDEVICE_PATH := $(SDK_ROOT)/components/softdevice/s112/hex/s112_nrf52_6.1.1_softdevice.hex
+	SOFTDEVICE_PATH := $(SDK_ROOT)/components/softdevice/s112/hex/s112_nrf52_7.2.0_softdevice.hex
 endif
     INC_FOLDERS += \
 		$(SDK_ROOT)/components/softdevice/s112/headers/nrf52 \
@@ -268,10 +259,10 @@ endif
 else ifeq ($(SOFTDEVICE), S132)
 	CFLAGS += -DS132
 	ASMFLAGS += -DS132
-	SOFTDEVICE_NAME := s132_nrf52_6.1.1_softdevice.hex
+	SOFTDEVICE_NAME := s112_nrf52_7.2.0_softdevice.hex
 	SOFTDEVICE_VER  := 0xb7
 ifndef SOFTDEVICE_PATH
-	SOFTDEVICE_PATH := $(SDK_ROOT)/components/softdevice/s132/hex/s132_nrf52_6.1.1_softdevice.hex
+	SOFTDEVICE_PATH := $(SDK_ROOT)/components/softdevice/s132/hex/s132_nrf52_7.2.0_softdevice.hex
 endif
 	INC_FOLDERS += \
 		$(SDK_ROOT)/components/softdevice/s132/headers/nrf52 \

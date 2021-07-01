@@ -197,7 +197,7 @@ static void storage_callback(fds_evt_t const* p_evt)
 {
     switch (p_evt->id) {
     case FDS_EVT_INIT:
-        if (p_evt->result == FDS_SUCCESS) {
+        if (p_evt->result == NRF_SUCCESS) {
             s_fds_initialized = true;
         }
         if (p_evt->result == FDS_ERR_NO_PAGES) {
@@ -206,7 +206,7 @@ static void storage_callback(fds_evt_t const* p_evt)
         break;
     case FDS_EVT_GC:
         // GC完毕事件
-        if (p_evt->result == FDS_SUCCESS) {
+        if (p_evt->result == NRF_SUCCESS) {
             ret_code_t err_code;
 
             while (!gc_queue_empty()) {
@@ -220,10 +220,10 @@ static void storage_callback(fds_evt_t const* p_evt)
                     break;
                 default:
                     // 操作未定义，直接跳过
-                    err_code = FDS_SUCCESS;
+                    err_code = NRF_SUCCESS;
                     break;
                 }
-                if (err_code == FDS_SUCCESS) {
+                if (err_code == NRF_SUCCESS) {
                     gc_queue_pop();
                 } else {
                     // 没有空间了，尝试GC
@@ -308,7 +308,7 @@ static void storage_read_inner(fds_record_t const* record, fds_record_desc_t* re
     fds_flash_record_t flash_record = { 0 };
 
     // 查找对应记录
-    if (fds_record_find(record->file_id, record->key, record_desc, &ftok) == FDS_SUCCESS) {
+    if (fds_record_find(record->file_id, record->key, record_desc, &ftok) == NRF_SUCCESS) {
         fds_record_open(record_desc, &flash_record);
 
         if (flash_record.p_header->length_words == record->data.length_words) {
