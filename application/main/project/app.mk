@@ -1,4 +1,4 @@
-PROJECT_NAME     := ble_app_hids_keyboard_pca10040e_s112
+PROJECT_NAME     := ble_app_hids_keyboard
 TARGETS          := nrf52_kbd
 
 ifndef OUTPUT_DIRECTORY
@@ -11,6 +11,8 @@ endif
 
 ifeq ($(NRF_CHIP), nrf52810)
 	include $(APP_PROJ_DIR)/nrf52810.mk
+else ifeq ($(NRF_CHIP), nrf52811)
+	include $(APP_PROJ_DIR)/nrf52811.mk
 else ifeq ($(NRF_CHIP), nrf52832)
 	include $(APP_PROJ_DIR)/nrf52832.mk
 else
@@ -206,7 +208,6 @@ CFLAGS += $(OPT)
 CFLAGS += -DAPP_TIMER_V2
 CFLAGS += -DAPP_TIMER_V2_RTC1_ENABLED
 CFLAGS += -DNRF52_APP
-CFLAGS += -DNRF52_PAN_74
 CFLAGS += -DNRFX_COREDEP_DELAY_US_LOOP_CYCLES=3
 CFLAGS += -DNRF_DFU_SVCI_ENABLED
 CFLAGS += -DNRF_DFU_TRANSPORT_BLE=1
@@ -248,7 +249,7 @@ ifeq ($(SOFTDEVICE), S112)
 	CFLAGS += -DS112
 	ASMFLAGS += -DS112
 	SOFTDEVICE_NAME := s112_nrf52_7.2.0_softdevice.hex
-	SOFTDEVICE_VER  := 0xb8
+	SOFTDEVICE_VER  := 0x103
 ifndef SOFTDEVICE_PATH
 	SOFTDEVICE_PATH := $(SDK_ROOT)/components/softdevice/s112/hex/s112_nrf52_7.2.0_softdevice.hex
 endif
@@ -260,7 +261,7 @@ else ifeq ($(SOFTDEVICE), S132)
 	CFLAGS += -DS132
 	ASMFLAGS += -DS132
 	SOFTDEVICE_NAME := s112_nrf52_7.2.0_softdevice.hex
-	SOFTDEVICE_VER  := 0xb7
+	SOFTDEVICE_VER  := 0x101
 ifndef SOFTDEVICE_PATH
 	SOFTDEVICE_PATH := $(SDK_ROOT)/components/softdevice/s132/hex/s132_nrf52_7.2.0_softdevice.hex
 endif

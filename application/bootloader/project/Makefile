@@ -1,4 +1,4 @@
-PROJECT_NAME     := secure_bootloader_ble_s112_pca10040e
+PROJECT_NAME     := secure_bootloader_ble
 TARGETS          := $(NRF_CHIP)_bootloader
 
 ifndef OUTPUT_DIRECTORY
@@ -27,6 +27,8 @@ endif
 
 ifeq ($(NRF_CHIP), nrf52810)
 	include $(APP_PROJ_DIR)/nrf52810.mk
+else ifeq ($(NRF_CHIP), nrf52811)
+	include $(APP_PROJ_DIR)/nrf52811.mk
 else ifeq ($(NRF_CHIP), nrf52832)
 	include $(APP_PROJ_DIR)/nrf52832.mk
 else
@@ -166,8 +168,6 @@ OPT = -Os -g3
 # C flags common to all targets
 CFLAGS += $(OPT)
 CFLAGS += -DBLE_STACK_SUPPORT_REQD
-CFLAGS += -DBOARD_PCA10040
-CFLAGS += -DNRF52_PAN_74
 CFLAGS += -DNRFX_COREDEP_DELAY_US_LOOP_CYCLES=3
 CFLAGS += -DNRF_DFU_SETTINGS_VERSION=2
 CFLAGS += -DNRF_DFU_SVCI_ENABLED
@@ -198,8 +198,6 @@ ASMFLAGS += -g3
 ASMFLAGS += -mcpu=cortex-m4
 ASMFLAGS += -mthumb -mabi=aapcs
 ASMFLAGS += -DBLE_STACK_SUPPORT_REQD
-ASMFLAGS += -DBOARD_PCA10040
-ASMFLAGS += -DNRF52_PAN_74
 ASMFLAGS += -DNRFX_COREDEP_DELAY_US_LOOP_CYCLES=3
 ASMFLAGS += -DNRF_DFU_SETTINGS_VERSION=2
 ASMFLAGS += -DNRF_DFU_SVCI_ENABLED
