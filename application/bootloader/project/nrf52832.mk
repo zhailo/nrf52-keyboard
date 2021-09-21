@@ -22,7 +22,7 @@ ifndef NRF52_DISABLE_FPU
 	
 # Libraries common to all targets
 LIB_FILES += \
-	$(SDK_ROOT)/external/nrf_oberon/lib/cortex-m4/hard-float/liboberon_3.0.6.a \
+	$(SDK_ROOT)/external/nrf_oberon/lib/cortex-m4/hard-float/liboberon_3.0.8.a \
 	$(SDK_ROOT)/external/micro-ecc/nrf52hf_armgcc/armgcc/micro_ecc_lib_nrf52.a
 else
 	CFLAGS += -DFLOAT_ABI_SOFT
@@ -32,7 +32,7 @@ else
 	
 # Libraries common to all targets
 LIB_FILES += \
-	$(SDK_ROOT)/external/nrf_oberon/lib/cortex-m4/soft-float/liboberon_3.0.6.a \
+	$(SDK_ROOT)/external/nrf_oberon/lib/cortex-m4/soft-float/liboberon_3.0.8.a \
 	$(SDK_ROOT)/external/micro-ecc/nrf52nf_armgcc/armgcc/micro_ecc_lib_nrf52.a
 endif
 
