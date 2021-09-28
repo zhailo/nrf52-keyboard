@@ -74,6 +74,7 @@ static void custom_led_evt_handler(enum user_event event, void* arg)
             nrf_gpio_cfg_output(LED_CAPS);
             LED_WRITE(LED_CAPS, 1);
             nrf_delay_ms(20);
+            LED_WRITE(LED_CAPS, 0);
             app_timer_create(&ble_led_blink_timer, APP_TIMER_MODE_REPEATED, ble_led_blink_timer_handler);
 #endif
             break;
