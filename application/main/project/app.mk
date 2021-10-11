@@ -398,19 +398,19 @@ pyocd_flash_all: all
 
 openocd_flash: default
 	@echo Flashing: $(OUTPUT_DIRECTORY)/nrf52_kbd.hex
-	$(OCD) -f $(OCD_CFG) -c "program $(OUTPUT_DIRECTORY)/nrf52_kbd.hex verify reset exit"
+	$(OCD) -f $(OCD_CFG) -c "program $(OUTPUT_DIRECTORY)/nrf52_kbd.hex verify" -c reset -c exit
 
 openocd_flash_setting: setting
 	@echo Flashing: $(OUTPUT_DIRECTORY)/nrf52_kbd.hex and $(OUTPUT_DIRECTORY)/nrf52_settings.hex
-	$(OCD) -f $(OCD_CFG) -c "program $(OUTPUT_DIRECTORY)/nrf52_settings.hex verify" -c "program $(OUTPUT_DIRECTORY)/nrf52_kbd.hex verify reset exit"
+	$(OCD) -f $(OCD_CFG) -c "program $(OUTPUT_DIRECTORY)/nrf52_settings.hex verify" -c "program $(OUTPUT_DIRECTORY)/nrf52_kbd.hex verify" -c reset -c exit
 
 openocd_flash_softdevice:
 	@echo Flashing: $(SOFTDEVICE_PATH)
-	$(OCD) -f $(OCD_CFG) -c "program $(SOFTDEVICE_PATH) verify reset exit"
+	$(OCD) -f $(OCD_CFG) -c "program $(SOFTDEVICE_PATH) verify" -c reset -c exit
 
 openocd_flash_all: all
 	@echo Flashing: $(OUTPUT_DIRECTORY)/nrf52_all.hex
-	$(OCD) -f $(OCD_CFG) -c "program $(OUTPUT_DIRECTORY)/nrf52_all.hex verify reset exit"
+	$(OCD) -f $(OCD_CFG) -c "program $(OUTPUT_DIRECTORY)/nrf52_all.hex verify" -c reset -c exit
 
 # Erase chip
 erase:
