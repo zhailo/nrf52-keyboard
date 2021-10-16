@@ -101,7 +101,7 @@ static void encoder_init()
 
 #ifdef LOW_POWER_QDEC_TICKS
     app_timer_create(&qdec_timer, APP_TIMER_MODE_REPEATED, decoder_timeout_handler);
-    app_timer_start(qdec_timer, APP_TIMER_TICKS(2), NULL);
+    app_timer_start(qdec_timer, APP_TIMER_TICKS(LOW_POWER_QDEC_TICKS), NULL);
 #endif
 }
 
