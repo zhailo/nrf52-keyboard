@@ -17,3 +17,16 @@ ROTARY_ENCODER = yes
 
 #define LOW_POWER_QDEC_TICKS 2 // 定义低功耗模式下旋转编码器每隔多少ms扫描一次，不写则不使用低功耗模式
 ```
+
+## 径向控制器
+
+径向控制器是一个旋钮，其典型设备是 Surface Dial.
+
+### 启用配置
+```
+RADIAL_CONTROLLER = yes
+```
+
+### 附加说明
+
+`radial_controller.h` 定义了径向控制器的相关Fn访问宏。
