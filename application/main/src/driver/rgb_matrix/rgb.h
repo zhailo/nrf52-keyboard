@@ -16,24 +16,24 @@
 
 #pragma once
 
-__attribute__((weak)) void ws2812_toggle(void) {};
+__attribute__((weak)) void rgblight_toggle(void) {};
 
-__attribute__((weak)) void ws2812_step(void) {};
+__attribute__((weak)) void rgblight_step(void) {};
 
-__attribute__((weak)) void ws2812_step_reverse(void) {};
+__attribute__((weak)) void rgblight_step_reverse(void) {};
 
-__attribute__((weak)) void ws2812_increase_hue(void) {};
+__attribute__((weak)) void rgblight_increase_hue(void) {};
 
-__attribute__((weak)) void ws2812_decrease_hue(void) {};
+__attribute__((weak)) void rgblight_decrease_hue(void) {};
 
-__attribute__((weak)) void ws2812_increase_sat(void) {};
+__attribute__((weak)) void rgblight_increase_sat(void) {};
 
-__attribute__((weak)) void ws2812_decrease_sat(void) {};
+__attribute__((weak)) void rgblight_decrease_sat(void) {};
 
-__attribute__((weak)) void ws2812_increase_val(void) {};
+__attribute__((weak)) void rgblight_increase_val(void) {};
 
-__attribute__((weak)) void ws2812_decrease_val(void) {};
+__attribute__((weak)) void rgblight_decrease_val(void) {};
 
-__attribute__((weak)) void ws2812_increase_speed(void) {};
+__attribute__((weak)) void rgblight_increase_speed(void) {};
 
-__attribute__((weak)) void ws2812_decrease_speed(void) {};
+__attribute__((weak)) void rgblight_decrease_speed(void) {};
