@@ -22,9 +22,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "app_error.h"
 #include "app_scheduler.h"
 #include "nrf_delay.h"
+#include "nrf_gpio.h"
 
-#include "keyboard_battery.h"
 #include "events.h"
+#include "keyboard_battery.h"
 #include "keyboard_evt.h"
 #include "passkey.h"
 #include "power_save.h"
@@ -129,6 +130,16 @@ static void ssd1306_twi_init()
     twi_channel = shared_i2c_init(SSD1306_SDA, SSD1306_SCL);
     if (twi_channel == NULL)
         APP_ERROR_HANDLER(1);
+}
+
+/**
+ * @brief 释放OLED针脚
+ * 
+ */
+static void ssd1306_oled_uninit()
+{
+    nrf_gpio_cfg_default(SSD1306_SDA);
+    nrf_gpio_cfg_default(SSD1306_SCL);
 }
 
 /**
@@ -275,6 +286,7 @@ static void ssd1306_event_handler(enum user_event event, void* arg)
             if (ssd1306_inited) {
                 ssd1306_sleep();
                 nrf_delay_ms(10);
+                ssd1306_oled_uninit();
             }
             break;
         default:
