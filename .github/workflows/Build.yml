@@ -2,6 +2,7 @@ name: Build ALL
 
 on:
   workflow_dispatch:
+  push:
 
 jobs:
   build:
@@ -40,5 +41,6 @@ jobs:
       with:
         name: LotKB_Keyboard_Firmware
         path: |
-          /home/runner/work/nrf52-keyboard/nrf52-keyboard/keyboard/_build/*.zip
-          /home/runner/work/nrf52-keyboard/nrf52-keyboard/keyboard/_build/*.hex
+          ${{ github.workspace }}/keyboard/_build/*.zip
+          ${{ github.workspace }}/keyboard/_build/*.hex
+          ${{ github.workspace }}/keyboard/_build/*.bin

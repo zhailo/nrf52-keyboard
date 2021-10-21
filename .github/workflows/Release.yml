@@ -40,5 +40,13 @@ jobs:
       with:
         tag_name: ${{ github.ref }}
         files: |
-          /home/runner/work/nrf52-keyboard/nrf52-keyboard/keyboard/_build/*.zip
-          /home/runner/work/nrf52-keyboard/nrf52-keyboard/keyboard/_build/*.hex
+          ${{ github.workspace }}/keyboard/_build/*.zip
+          ${{ github.workspace }}/keyboard/_build/*.hex
+    - name: Upload Artifact Files
+      uses: actions/upload-artifact@v2
+      with:
+        name: LotKB_Keyboard_Firmware
+        path: |
+          ${{ github.workspace }}/keyboard/_build/*.zip
+          ${{ github.workspace }}/keyboard/_build/*.hex
+          ${{ github.workspace }}/keyboard/_build/*.bin
