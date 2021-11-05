@@ -42,7 +42,8 @@ jobs:
     - name: Release
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: ${{ env.BUILDTIME }}-${{ env.VERSION }} SDK17.1
+        tag_name: ${{ env.BUILDTIME }}-${{ env.VERSION }}
+        name: SDK17.1 ${{ env.BUILDTIME }}-${{ env.VERSION }}
         repository: genokolar/nrf52-keyboard
         files: |
           ${{ github.workspace }}/keyboard/_build/*.zip
