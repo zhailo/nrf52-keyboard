@@ -35,13 +35,20 @@ jobs:
         cd keyboard
         make -j4
         cd ../
+    - name: Generate release tag
+      run: |
+        echo "VERSION=11`git log --abbrev-commit --pretty=oneline -1 | cut -c 1-6 || echo 'unknown'`" >> $GITHUB_ENV
+        echo "BUILDTIME=`date '+%Y%m%d'`" >> $GITHUB_ENV
     - name: Release
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: ${{ github.ref }}
+        tag_name: ${{ env.BUILDTIME }}-${{ env.VERSION }} SDK17.1
+        repository: genokolar/nrf52-keyboard
         files: |
           ${{ github.workspace }}/keyboard/_build/*.zip
           ${{ github.workspace }}/keyboard/_build/*.hex
+      env:
+          GITHUB_TOKEN: ${{ secrets.KEYBOARD }}
     - name: Upload Artifact Files
       uses: actions/upload-artifact@v2
       with:
