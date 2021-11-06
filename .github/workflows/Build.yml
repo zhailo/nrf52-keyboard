@@ -10,11 +10,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Get source
+    # 下载源码
+    - name: ⏬ Get source
       uses: actions/checkout@v2
       with:
         submodules: recursive
-    - name: Install Tools
+    # 下载安装相关工具
+    - name: ⚙️ Install Tools
       run: |
         sudo apt-get update
         sudo apt-get -y install python3-pip python3-setuptools
@@ -31,15 +33,22 @@ jobs:
         echo GNU_INSTALL_ROOT := /tmp/gcc-arm-none-eabi-9-2019-q4-major/bin/>template/Makefile.posix
         echo GNU_VERSION := 9.2.1>>template/Makefile.posix
         echo GNU_PREFIX := arm-none-eabi>>template/Makefile.posix
-    - name: Make
+    # 编译固件
+    - name: ⚒️ Make Firmware
       run: |
         cd keyboard
         make -j4
         cd ../
-    - name: Upload Artifact Files
+    # 生成发布tag
+    - name: 🎉 Generate release tag
+      run: |
+        echo "VERSION=11`git log --abbrev-commit --pretty=oneline -1 | cut -c 1-6 || echo 'unknown'`" >> $GITHUB_ENV
+        echo "BUILDTIME=`date '+%Y%m%d'`" >> $GITHUB_ENV
+    # 打包上传编译生成的固件
+    - name: 📦️ Upload Artifact Files
       uses: actions/upload-artifact@v2
       with:
-        name: LotKB_Keyboard_Firmware
+        name: LotKB_Keyboard_Firmware_${{ env.BUILDTIME }}_${{ env.VERSION }}
         path: |
           ${{ github.workspace }}/keyboard/_build/*.zip
           ${{ github.workspace }}/keyboard/_build/*.hex
