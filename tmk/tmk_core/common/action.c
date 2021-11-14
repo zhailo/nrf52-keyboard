@@ -168,7 +168,7 @@ void process_action(keyrecord_t *record)
                                     if (action.key.code == KC_CAPSLOCK ||
                                             action.key.code == KC_NUMLOCK ||
                                             action.key.code == KC_SCROLLLOCK) {
-                                        wait_ms(100);
+                                        wait_ms(20);
                                     }
                                 }
                             } else {
@@ -306,7 +306,7 @@ void process_action(keyrecord_t *record)
                             if (action.layer_tap.code == KC_CAPSLOCK ||
                                     action.layer_tap.code == KC_NUMLOCK ||
                                     action.layer_tap.code == KC_SCROLLLOCK) {
-                                wait_ms(100);
+                                wait_ms(20);
                             }
                         } else {
                             dprint("KEYMAP_TAP_KEY: No tap: On on press\n");
@@ -409,7 +409,7 @@ void register_code(uint8_t code)
 #endif
         add_key(c);
         send_keyboard_report();
-        wait_ms(100); // Delay for MacOS #390
+        wait_ms(20); // Delay for MacOS #390
         del_key(c);
         send_keyboard_report();
     }
@@ -478,7 +478,7 @@ void unregister_code(uint8_t code)
 #endif
         add_key(c);
         send_keyboard_report();
-        wait_ms(100); // Delay for MacOS #390
+        wait_ms(20); // Delay for MacOS #390
         del_key(c);
         send_keyboard_report();
     }
