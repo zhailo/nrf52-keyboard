@@ -50,6 +50,7 @@ jobs:
         tag_name: ${{ env.BUILDTIME }}-${{ env.VERSION }}
         name: SDK17.1 ${{ env.BUILDTIME }}-${{ env.VERSION }}
         repository: genokolar/nrf52-keyboard
+        generate_release_notes: true
         files: |
           ${{ github.workspace }}/keyboard/_build/*.zip
           ${{ github.workspace }}/keyboard/_build/*.hex
