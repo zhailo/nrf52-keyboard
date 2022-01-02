@@ -582,17 +582,17 @@ void rgb_matrix_enable_noeeprom(void) //need mod
 
 void rgb_matrix_disable(void) //need mod
 {
-    ws2812_pwr_off();
     rgb_matrix_disable_noeeprom();
     eeconfig_update_rgb_matrix();
 }
 
 void rgb_matrix_disable_noeeprom(void) //need mod
 {
-    ws2812_pwr_off();
     if (rgb_matrix_config.enable)
         rgb_task_state = STARTING;
     rgb_matrix_config.enable = 0;
+    wait_ms(10);
+    ws2812_pwr_off();
 }
 
 uint8_t rgb_matrix_is_enabled(void) { return rgb_matrix_config.enable; }
