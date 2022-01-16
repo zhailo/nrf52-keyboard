@@ -75,4 +75,4 @@ jobs:
         local-dir: ${{ github.workspace }}/keyboard/_build/
         server-dir: /htdocs/down/sdk17/
         state-name: ../.ftp-deploy-sync-state.json
-        exclude: "[*/**, *-nrf52_dfu-*.zip, *-nrf52_kbd_sign-*.hex, *-ch554-*.bin]"
+        exclude: "[*/**, *-nrf52*_dfu-*.zip, *-nrf52*_kbd_sign-*.hex, *-ch554-*.bin]"

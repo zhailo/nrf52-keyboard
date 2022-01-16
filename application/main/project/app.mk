@@ -19,6 +19,10 @@ else
 	$(error cannot handle NRF_CHIP [$(NRF_CHIP)])
 endif
 
+ifndef NRF_KBD_NAME
+	NRF_KBD_NAME := $(OUTPUT_DIRECTORY)/nrf52_kbd_$(VERSION).hex
+endif
+
 ifndef NRF_PACKAGE_NAME
 	NRF_PACKAGE_NAME := $(OUTPUT_DIRECTORY)/nrf52_kbd_$(VERSION).zip
 endif
@@ -328,6 +332,10 @@ $(foreach target, $(TARGETS), $(call define_target, $(target)))
 .PHONY: flash setting flash_setting flash_softdevice erase pyocd_flash pyocd_flash_softdevice pyocd_erase
 
 # Flash the program
+kbd: default
+	@echo Move $(OUTPUT_DIRECTORY)/nrf52_kbd.hex to $(NRF_KBD_NAME)
+	cp -f $(OUTPUT_DIRECTORY)/nrf52_kbd.hex $(NRF_KBD_NAME)
+
 flash: default
 	@echo Flashing: $(OUTPUT_DIRECTORY)/nrf52_kbd.hex
 	nrfjprog -f nrf52 --program $(OUTPUT_DIRECTORY)/nrf52_kbd.hex --sectorerase
