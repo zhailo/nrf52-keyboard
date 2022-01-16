@@ -79,12 +79,28 @@ led_config_t g_led_config = {
 		4  , 4, 4, 4, 4, 4, 4, 4 }
 };
 
+extern uint8_t switch_id;
+
 void rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     if (host_keyboard_leds() & (1 << 1)) { //CAPS
         rgb_matrix_set_color(22, RGB_RED);
     }
     if (usb_working()) { //USB WORKING
         rgb_matrix_set_color(0, RGB_GREEN);
+    } else {
+        switch (switch_id) {
+        case 0:
+            rgb_matrix_set_color(0, RGB_BLUE);
+            break;
+        case 1:
+            rgb_matrix_set_color(0, RGB_RED);
+            break;
+        case 2:
+            rgb_matrix_set_color(0, RGB_ORANGE);
+            break;
+        default:
+            break;
+        }
     }
 }
 
