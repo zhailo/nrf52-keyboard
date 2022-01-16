@@ -75,7 +75,7 @@ led_config_t g_led_config = {
         4, 4, 4,}
 };
 
-extern uint8_t switch_id;
+extern uint8_t ble_channel; //引入蓝牙通道全局变量
 
 void rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     if (host_keyboard_leds() & (1 << 0)) { //NUMLOCK
@@ -84,7 +84,7 @@ void rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     if (usb_working()) { //USB WORKING
         rgb_matrix_set_color(1, RGB_GREEN);
     } else {
-        switch (switch_id) {
+        switch (ble_channel) {
         case 0:
             rgb_matrix_set_color(1, RGB_BLUE);
             break;
