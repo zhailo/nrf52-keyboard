@@ -40,12 +40,7 @@ __attribute__((weak)) RGB rgb_matrix_hsv_to_rgb(HSV hsv)
 }
 
 // Generic effect runners
-#include "rgb_matrix_runners/effect_runner_dx_dy.h"
-#include "rgb_matrix_runners/effect_runner_dx_dy_dist.h"
-#include "rgb_matrix_runners/effect_runner_i.h"
-#include "rgb_matrix_runners/effect_runner_reactive.h"
-#include "rgb_matrix_runners/effect_runner_reactive_splash.h"
-#include "rgb_matrix_runners/effect_runner_sin_cos_i.h"
+#include "rgb_matrix_runners/rgb_matrix_runners.inc"
 
 // ------------------------------------------
 // -----Begin rgb effect includes macros-----
@@ -540,8 +535,9 @@ void rgb_matrix_init(void)  //need mod
 void rgb_matrix_set_suspend_state(bool state)
 {
 #ifdef RGB_DISABLE_WHEN_USB_SUSPENDED
-    if (state) {
-        rgb_matrix_set_color_all(0, 0, 0); // turn off all LEDs when suspending
+    if (state && !suspend_state) { // only run if turning off, and only once
+        rgb_task_render(0); // turn off all LEDs when suspending
+        rgb_task_flush(0); // and actually flash led state to LEDs
     }
     suspend_state = state;
 #endif
