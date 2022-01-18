@@ -741,6 +741,17 @@ static void status_rgb_matrix_evt_handler(enum user_event event, void* arg) //ne
             break;
         }
         break;
+    case USER_EVT_BLE_STATE_CHANGE: // 蓝牙状态事件
+        switch (arg2) {
+        case BLE_STATE_CONNECTED:
+        case BLE_STATE_DISCONNECT:
+        case BLE_STATE_FAST_ADV:
+            power_save_reset();
+            break;
+        default:
+            break;
+        }
+        break;
     default:
         break;
     }
