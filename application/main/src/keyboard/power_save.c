@@ -23,7 +23,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #if LED_AUTOOFF_TIME > 0
 
 static uint32_t tick_counter = 0;
-uint8_t power_save_mode; //省电模式全局变量
+uint8_t power_save_mode = 1; //省电模式全局变量
 
 static void notify_mode(enum power_save_mode mode)
 {
