@@ -168,8 +168,8 @@ enum hid_protocol_type {
  * 省电事件状态
  */
 enum power_save_mode {
-    PWR_SAVE_ON, // 启用省电模式
     PWR_SAVE_OFF, // 禁用省电模式
+    PWR_SAVE_ON, // 启用省电模式
     PWR_SAVE_ENTER, // 进入省电模式
     PWR_SAVE_EXIT, // 退出省电模式
 };
