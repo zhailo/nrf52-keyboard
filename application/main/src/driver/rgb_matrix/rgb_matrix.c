@@ -20,6 +20,7 @@
 #include "config.h"
 #include "data_storage.h"
 #include "keyboard_evt.h"
+#include "power_save.h"
 #include "progmem.h"
 #include "timer.h"
 #include "wait.h"
@@ -716,6 +717,15 @@ static void status_rgb_matrix_evt_handler(enum user_event event, void* arg) //ne
         switch (arg2) {
         case KBD_STATE_SLEEP: // 准备休眠
             rgb_matrix_sleep_prepare();
+            break;
+        default:
+            break;
+        }
+        break;
+    case USER_EVT_POWERSAVE:
+        switch (arg2) {
+        case PWR_SAVE_EXIT: // 重置省电模式
+            power_save_reset();
             break;
         default:
             break;

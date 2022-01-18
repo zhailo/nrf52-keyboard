@@ -80,14 +80,15 @@ led_config_t g_led_config = {
 };
 
 extern uint8_t ble_channel; //引入蓝牙通道全局变量
+extern uint8_t power_save_mode; //引入省电模式全局变量
 
 void rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
-    if (host_keyboard_leds() & (1 << 1)) { //CAPS
+    if ((host_keyboard_leds() & (1 << 1)) && power_save_mode != 2 ) { //CAPS
         rgb_matrix_set_color(22, RGB_RED);
     }
     if (usb_working()) { //USB WORKING
         rgb_matrix_set_color(0, RGB_GREEN);
-    } else {
+    } else if (power_save_mode != 2) {
         switch (ble_channel) {
         case 0:
             rgb_matrix_set_color(0, RGB_BLUE);
