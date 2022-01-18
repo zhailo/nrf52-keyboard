@@ -56,8 +56,8 @@ jobs:
           ${{ github.workspace }}/keyboard/_build/*.hex
       env:
           GITHUB_TOKEN: ${{ secrets.KEYBOARD }}
-    # 打包上传编译生成的固件
-    - name: 📦️ Upload Artifact Files
+    # 上传编译生成的固件
+    - name: 📤 Upload Artifact Files
       uses: actions/upload-artifact@v2
       with:
         name: LotKB_Keyboard_Firmware_${{ env.BUILDTIME }}_${{ env.VERSION }}
@@ -65,6 +65,17 @@ jobs:
           ${{ github.workspace }}/keyboard/_build/*.zip
           ${{ github.workspace }}/keyboard/_build/*.hex
           ${{ github.workspace }}/keyboard/_build/*.bin
+    # 下载编译生成的固件      
+    - name: 📥 Download Artifact Files
+      uses: actions/download-artifact@v2
+      with:
+        name: LotKB_Keyboard_Firmware_${{ env.BUILDTIME }}_${{ env.VERSION }}
+        path: ${{ github.workspace }}/keyboard/_build/Artifact
+    # 打包编译生成的固件
+    - name: 📦️ ZIP Artifact Files
+      run:  |
+        cd ${{ github.workspace }}/keyboard/_build/Artifact
+        zip -r ../LotKB_Keyboard_Firmware_${{ env.BUILDTIME }}_${{ env.VERSION }}.zip *
     # 通过FTP上传到个人HOST
     - name: 📂 Sync files
       uses: SamKirkland/FTP-Deploy-Action@4.1.0
@@ -74,5 +85,5 @@ jobs:
         password: ${{ secrets.PASSWORD }}
         local-dir: ${{ github.workspace }}/keyboard/_build/
         server-dir: /htdocs/down/sdk17/
-        state-name: ../.ftp-deploy-sync-state.json
-        exclude: "[*/**, *-nrf52*_dfu-*.zip, *-nrf52*_kbd_sign-*.hex, *-ch554-*.bin]"
+        state-name: ../.sdk17-firmware-sync-state.json
+        exclude: "[*/**, *-nrf52*_dfu-*.zip, *-nrf52*_kbd_sign-*.hex, *-nrf52*_kbd-*.hex, *-ch554-*.bin]"
