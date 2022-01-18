@@ -122,6 +122,7 @@ __attribute__((weak)) RGB rgb_matrix_hsv_to_rgb(HSV hsv)
 // globals
 rgb_config_t rgb_matrix_config; // TODO: would like to prefix this with g_ for global consistancy, do this in another pr
 uint32_t g_rgb_timer;
+//bool rgb_matrix_indicators_on;
 #ifdef RGB_MATRIX_FRAMEBUFFER_EFFECTS
 uint8_t g_rgb_frame_buffer[MATRIX_ROWS][MATRIX_COLS] = { { 0 } };
 #endif // RGB_MATRIX_FRAMEBUFFER_EFFECTS
@@ -131,7 +132,7 @@ last_hit_t g_last_hit_tracker;
 
 // internals
 static bool suspend_state = false;
-static uint8_t rgb_last_enable = UINT8_MAX;
+static bool rgb_last_enable;
 static uint8_t rgb_last_effect = UINT8_MAX;
 static effect_params_t rgb_effect_params = { 0, LED_FLAG_ALL, false };
 static rgb_task_states rgb_task_state = SYNCING;
@@ -174,6 +175,7 @@ void eeconfig_update_rgb_matrix(void) {
 void eeconfig_update_rgb_matrix_default(void)
 {
     rgb_matrix_config.enable = 1;
+    rgb_matrix_config.indicators = 1;
     rgb_matrix_config.mode = RGB_MATRIX_STARTUP_MODE;
     rgb_matrix_config.hsv = (HSV) { RGB_MATRIX_STARTUP_HUE, RGB_MATRIX_STARTUP_SAT, RGB_MATRIX_STARTUP_VAL };
     rgb_matrix_config.speed = RGB_MATRIX_STARTUP_SPD;
@@ -593,6 +595,7 @@ void rgb_matrix_disable_noeeprom(void) //need mod
 }
 
 uint8_t rgb_matrix_is_enabled(void) { return rgb_matrix_config.enable; }
+uint8_t rgb_matrix_is_indicator(void) { return rgb_matrix_config.indicators; }
 
 void rgb_matrix_mode_eeprom_helper(uint8_t mode, bool write_to_eeprom)
 {
@@ -707,6 +710,13 @@ void rgb_matrix_sleep_prepare(void)  //need mod
     rgb_matrix_disable_noeeprom();
     wait_ms(1);
     ws2812_pwr_deinit();
+}
+
+//指示灯是否启用开关
+void rgb_matrix_toggle_indicator(void)  //need mod
+{
+    rgb_matrix_config.indicators ^= 1;
+    power_save_reset();
 }
 
 static void status_rgb_matrix_evt_handler(enum user_event event, void* arg) //need mod
