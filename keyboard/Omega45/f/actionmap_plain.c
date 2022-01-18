@@ -97,9 +97,9 @@ void rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     if ((host_keyboard_leds() & (1 << 1)) && power_save_mode != 2 ) { //CAPS
         rgb_matrix_set_color(23, RGB_RED);
     }
-    if (usb_working()) { //USB WORKING
+    if (usb_working() && rgb_matrix_is_indicator()) { //USB WORKING
         rgb_matrix_set_color(0, RGB_GREEN);
-    } else if (power_save_mode != 2) {
+    } else if ((power_save_mode != 2) && rgb_matrix_is_indicator()) {
         switch (ble_channel) {
         case 0:
             rgb_matrix_set_color(0, RGB_BLUE);
