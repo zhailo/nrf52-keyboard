@@ -289,6 +289,9 @@ static bool command_common(uint8_t code)
 #ifdef RGB_LIGHT_ENABLE
         rgb_indicator_toggle();
 #endif
+#ifdef RGB_MATRIX_ENABLE
+        rgb_matrix_toggle_indicator();
+#endif
         break;
     default:
         return false;
