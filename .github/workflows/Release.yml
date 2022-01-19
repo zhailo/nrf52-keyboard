@@ -10,7 +10,7 @@ jobs:
 
     steps:
     # 下载源码
-    - name: ⏬ Get source
+    - name: ⏬ Get nRF52-Keyboard source
       uses: actions/checkout@v2
       with:
         submodules: recursive
@@ -87,3 +87,52 @@ jobs:
         server-dir: /htdocs/down/sdk17/
         state-name: ../.sdk17-firmware-sync-state.json
         exclude: "[*/**, *-nrf52*_dfu-*.zip, *-nrf52*_kbd_sign-*.hex, *-nrf52*_kbd-*.hex, *-ch554-*.bin]"
+    # 下载CMSIS-DAP Flasher源码
+    - name: ⏬ Get CMSIS-DAP Flasher source
+      uses: actions/checkout@v2
+      with:
+        repository: genokolar/cmsis-dap-flasher
+        path: cmsis-dap-flasher
+    # 为CMSIS-DAP Flasher生成hex目录存放固件
+    - name: 🗃 Generate Folder
+      run: |
+        cd ${{ github.workspace }}/cmsis-dap-flasher
+        mkdir hex
+        cd ${{ github.workspace }}
+    # 下载编译生成的固件      
+    - name: 📥 Download Artifact Files
+      uses: actions/download-artifact@v2
+      with:
+        name: LotKB_Keyboard_Firmware_${{ env.BUILDTIME }}_${{ env.VERSION }}
+        path: ${{ github.workspace }}/cmsis-dap-flasher/hex/
+    # 更新CMSIS-DAP Flasher
+    - name: 📝 Update CMSIS-DAP Flasher Files
+      run: |
+        cd ${{ github.workspace }}/cmsis-dap-flasher
+        # 替换固件版本信息
+        sed -i 's/20220116-11dd5b41/${{ env.BUILDTIME }}-${{ env.VERSION }}/g' 开始烧录.bat
+        # 转换成Windows换行符
+        sed -i ':label;N;s/\n/*#/;b label' 开始烧录.bat
+        sed -i 's/*#/\r\n/g' 开始烧录.bat
+        # 删除HEX下多余文件
+        rm -rf ./hex/*.bin
+        rm -rf ./hex/*-nrf52*_dfu-*.zip
+        rm -rf ./hex/*-nrf52*_kbd_sign-*.hex
+        rm -rf ./hex/*-nrf52*_kbd-*.hex
+        cd ${{ github.workspace }}
+    # 打包CMSIS-DAP Flasher
+    - name: 📦️ ZIP Artifact Files
+      run:  |
+        cd ${{ github.workspace }}/cmsis-dap-flasher
+        zip -r CMSIS-DAP线刷包${{ env.BUILDTIME }}-${{ env.VERSION }}-SDK17.1.zip *
+    # 通过FTP上传到个人HOST
+    - name: 📂 Sync files
+      uses: SamKirkland/FTP-Deploy-Action@4.1.0
+      with:
+        server: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        password: ${{ secrets.PASSWORD }}
+        local-dir: ${{ github.workspace }}/cmsis-dap-flasher/
+        server-dir: /htdocs/down/sdk17/
+        state-name: ../.cmsis-dap-flasher-sync-state.json
+        exclude: "[*/**, *.bat, .gitignore]"
