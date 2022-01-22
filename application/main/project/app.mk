@@ -52,10 +52,10 @@ SRC_FILES += \
 	$(SDK_ROOT)/components/libraries/util/app_error_handler_gcc.c \
 	$(SDK_ROOT)/components/libraries/util/app_error_weak.c \
 	$(SDK_ROOT)/components/libraries/scheduler/app_scheduler.c \
-  $(SDK_ROOT)/components/libraries/timer/app_timer2.c \
+	$(SDK_ROOT)/components/libraries/timer/app_timer2.c \
 	$(SDK_ROOT)/components/libraries/util/app_util_platform.c \
 	$(SDK_ROOT)/components/libraries/crc16/crc16.c \
-  $(SDK_ROOT)/components/libraries/timer/drv_rtc.c \
+	$(SDK_ROOT)/components/libraries/timer/drv_rtc.c \
 	$(SDK_ROOT)/components/libraries/fds/fds.c \
 	$(SDK_ROOT)/components/libraries/hardfault/hardfault_implementation.c \
 	$(SDK_ROOT)/components/libraries/util/nrf_assert.c \
@@ -71,7 +71,7 @@ SRC_FILES += \
 	$(SDK_ROOT)/components/libraries/pwr_mgmt/nrf_pwr_mgmt.c \
 	$(SDK_ROOT)/components/libraries/ringbuf/nrf_ringbuf.c \
 	$(SDK_ROOT)/components/libraries/experimental_section_vars/nrf_section_iter.c \
-  $(SDK_ROOT)/components/libraries/sortlist/nrf_sortlist.c \
+	$(SDK_ROOT)/components/libraries/sortlist/nrf_sortlist.c \
 	$(SDK_ROOT)/components/libraries/strerror/nrf_strerror.c \
 	$(SDK_ROOT)/components/libraries/bootloader/dfu/nrf_dfu_svci.c \
 	$(SDK_ROOT)/components/libraries/low_power_pwm/low_power_pwm.c \
