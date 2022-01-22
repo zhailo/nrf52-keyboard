@@ -341,6 +341,10 @@ bool erase_bonds = false;
 int main(void)
 {
     // Initialize.
+#ifdef DCDC_ENABLED
+    //直接操作寄存器启用DCDC模式
+    NRF_POWER->DCDCEN = 1;
+#endif
     timers_init();
     power_management_init();
     storage_init();       //存储初始化
@@ -348,10 +352,6 @@ int main(void)
     trig_event_param(USER_EVT_STAGE, KBD_STATE_PRE_INIT);
 
     ble_stack_init();
-    // 启用DCDC模式
-#ifdef DCDC_ENABLED
-    sd_power_dcdc_mode_set(1);
-#endif
 #if APP_TIMER_CONFIG_USE_SCHEDULER == 1
     scheduler_init();
 #endif
