@@ -62,6 +62,7 @@ ifeq (yes,$(strip $(RGB_MATRIX_ENABLE)))
     SRC_FILES +=$(DRIVER_DIR)/rgb_matrix/ws2812.c \
                 $(DRIVER_DIR)/rgb_matrix/rgb_matrix.c \
                 $(DRIVER_DIR)/rgb_matrix/rgb_matrix_drivers.c \
+                $(DRIVER_DIR)/rgb_matrix/rgb_matrix_indicator.c \
                 $(DRIVER_DIR)/rgb_matrix/color.c \
                 $(DRIVER_DIR)/rgb_matrix/led_tables.c \
                 $(DRIVER_DIR)/rgb_matrix/rgblight_ctrl.c \

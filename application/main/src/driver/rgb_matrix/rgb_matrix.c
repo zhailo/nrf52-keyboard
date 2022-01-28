@@ -445,7 +445,7 @@ void rgb_matrix_task(void)  //need mod
 #endif // RGB_DISABLE_TIMEOUT > 0
         false;
 
-    uint8_t effect = suspend_backlight || !rgb_matrix_config.enable ? 0 : rgb_matrix_config.mode;
+    uint8_t effect = suspend_backlight || !rgb_matrix_config.enable ? rgb_matrix_config.indicators : rgb_matrix_config.mode;
 
     switch (rgb_task_state) {
     case STARTING: //初始
@@ -566,7 +566,6 @@ void rgb_matrix_toggle(void) { rgb_matrix_toggle_eeprom_helper(true); }
 
 void rgb_matrix_enable(void) //need mod
 {
-    ws2812_pwr_on();
     rgb_matrix_enable_noeeprom();
     eeconfig_update_rgb_matrix();
 }
