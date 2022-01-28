@@ -1,11 +1,11 @@
-name: Release 
+name: Release Glab3.0
 
 on:
   workflow_dispatch:
 
 jobs:
   build:
-    name: Release Firmware
+    name: Release Glab3.0 Firmware
     runs-on: ubuntu-latest
 
     steps:
@@ -77,15 +77,15 @@ jobs:
         cd ${{ github.workspace }}/keyboard/_build/Artifact
         zip -r ../LotKB_Keyboard_Firmware_${{ env.BUILDTIME }}_${{ env.VERSION }}.zip *
     # 通过FTP上传到个人HOST
-    - name: 📂 Sync files
+    - name: 📂 FTP upload firmware
       uses: SamKirkland/FTP-Deploy-Action@4.1.0
       with:
         server: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
         password: ${{ secrets.PASSWORD }}
         local-dir: ${{ github.workspace }}/keyboard/_build/
-        server-dir: /htdocs/down/sdk17/
-        state-name: ../.sdk17-firmware-sync-state.json
+        server-dir: /htdocs/down/Glab3.0/
+        state-name: ../.sdk17-glab3.0-firmware-sync-state.json
         exclude: "[*/**, *-nrf52*_dfu-*.zip, *-nrf52*_kbd_sign-*.hex, *-nrf52*_kbd-*.hex, *-ch554-*.bin]"
     # 下载CMSIS-DAP Flasher源码
     - name: ⏬ Get CMSIS-DAP Flasher source
@@ -126,13 +126,13 @@ jobs:
         cd ${{ github.workspace }}/cmsis-dap-flasher
         zip -r CMSIS-DAP线刷包${{ env.BUILDTIME }}-${{ env.VERSION }}-SDK17.1.zip *
     # 通过FTP上传到个人HOST
-    - name: 📂 Sync files
+    - name: 📂 FTP upload CMSIS-DAP
       uses: SamKirkland/FTP-Deploy-Action@4.1.0
       with:
         server: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
         password: ${{ secrets.PASSWORD }}
         local-dir: ${{ github.workspace }}/cmsis-dap-flasher/
-        server-dir: /htdocs/down/sdk17/
-        state-name: ../.cmsis-dap-flasher-sync-state.json
+        server-dir: /htdocs/down/Glab3.0/
+        state-name: ../.cmsis-dap-flasher-glab3.0-sync-state.json
         exclude: "[*/**, *.bat, .gitignore]"
