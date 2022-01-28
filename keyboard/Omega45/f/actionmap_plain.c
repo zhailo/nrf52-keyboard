@@ -19,11 +19,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "action_code.h"
 #include "actionmap_common.h"
 #include "keyboard_fn.h"
-#include "user_fn.h"
 #include "rgb_matrix.h"
 #include "rgb_matrix_types.h"
-#include "host.h"
-#include "usb_comm.h"
+#include "user_fn.h"
 
 /* 
  * 定义需使用的FN按键
@@ -89,30 +87,3 @@ led_config_t g_led_config = {
 		4  , 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
 		4  , 4, 4, 4, 4, 4, 4, 4, 4 }
 };
-
-extern uint8_t ble_channel; //引入蓝牙通道全局变量
-extern uint8_t power_save_mode; //引入省电模式全局变量
-
-void rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
-    if ((host_keyboard_leds() & (1 << 1)) && power_save_mode != 2 ) { //CAPS
-        rgb_matrix_set_color(23, RGB_RED);
-    }
-    if (usb_working() && rgb_matrix_is_indicator()) { //USB WORKING
-        rgb_matrix_set_color(0, RGB_GREEN);
-    } else if ((power_save_mode != 2) && rgb_matrix_is_indicator()) {
-        switch (ble_channel) {
-        case 0:
-            rgb_matrix_set_color(0, RGB_BLUE);
-            break;
-        case 1:
-            rgb_matrix_set_color(0, RGB_RED);
-            break;
-        case 2:
-            rgb_matrix_set_color(0, RGB_ORANGE);
-            break;
-        default:
-            break;
-        }
-    }
-}
-
