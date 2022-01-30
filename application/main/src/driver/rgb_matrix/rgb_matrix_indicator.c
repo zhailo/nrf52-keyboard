@@ -37,17 +37,17 @@ void rgb_matrix_indicators_advanced_kb(uint8_t led_min, uint8_t led_max)
 
     //键盘指示灯
 #ifdef RGB_MATRIX_INDICATORS_NUM
-    if ((host_keyboard_leds() & (1 << 0)) && power_save_mode != 2) { //NUM_LOCK
+    if ((host_keyboard_leds() & (1 << 0)) && (power_save_mode != 2) && rgb_matrix_is_indicator()) { //NUM_LOCK
         rgb_matrix_set_color(RGB_MATRIX_INDICATORS_NUM, RGB_RED);
     }
 #endif
 #ifdef RGB_MATRIX_INDICATORS_CAPS
-    if ((host_keyboard_leds() & (1 << 1)) && power_save_mode != 2) { //CAPS_LOCK
+    if ((host_keyboard_leds() & (1 << 1)) && (power_save_mode != 2) && rgb_matrix_is_indicator()) { //CAPS_LOCK
         rgb_matrix_set_color(RGB_MATRIX_INDICATORS_CAPS, RGB_RED);
     }
 #endif
 #ifdef RGB_MATRIX_INDICATORS_SCROLL
-    if ((host_keyboard_leds() & (1 << 2)) && power_save_mode != 2) { //SCROLL_LOCK
+    if ((host_keyboard_leds() & (1 << 2)) && (power_save_mode != 2) && rgb_matrix_is_indicator()) { //SCROLL_LOCK
         rgb_matrix_set_color(RGB_MATRIX_INDICATORS_SCROLL, RGB_RED);
     }
 #endif
@@ -99,6 +99,12 @@ static void status_rgb_matrix_indicators_evt_handler(enum user_event event, void
             break;
         default:
             break;
+        }
+        break;
+    case USER_EVT_LED: // 键盘灯状态改变
+    case USER_EVT_BLE_DEVICE_SWITCH: //蓝牙连接设备切换
+        if (rgb_matrix_is_indicator() && !rgb_matrix_is_enabled()) {
+            rgb_matrix_indicators_on();
         }
         break;
     default:
