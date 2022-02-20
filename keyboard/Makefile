@@ -2,12 +2,12 @@ OUTPUT_DIR = _build
 SUBDIRS=$(filter-out $(OUTPUT_DIR),$(shell ls -l | grep ^d | grep -v 'ergoconn\|g84-4100\|lkb-core\|lot60-ble\|template\|test' | awk '{print $$9}'))
 export RELEASE_DIR = ../$(OUTPUT_DIR)
 
-.PHONY: clean whole dist_clean help
-whole: $(SUBDIRS)
+.PHONY: clean release dist_clean help
+release: $(SUBDIRS)
 
 $(SUBDIRS): $(OUTPUT_DIR)
 	@-mkdir $(OUTPUT_DIR)/$@
-	@make -C $@ whole OUTPUT_DIRECTORY=$(RELEASE_DIR)/$@ BUILD_PREFIX=$@
+	@make -C $@ release OUTPUT_DIRECTORY=$(RELEASE_DIR)/$@ BUILD_PREFIX=$@
 
 $(OUTPUT_DIR):
 	@-mkdir -p $(OUTPUT_DIR)
@@ -34,6 +34,6 @@ help:
 	@echo		flash_bootloader    - Flashing bootloader
 	@echo		flash_softdevice    - Flashing softdevice
 	@echo		flash_all           - Flashing bootloader softdevice and application with dfu setting
-	@echo		whole               - make all keyboards firmware in the keyboard folder
+	@echo		release             - make all keyboards firmware in the keyboard folder
 	@echo All targets starts with "flash" could has prefix "pyocd_" or "openocd", which \
 	means use pyocd  or openocd to flash chip. 

@@ -11,17 +11,17 @@ ifndef BUILD_PREFIX
 BUILD_PREFIX = "farad69"
 endif
 
-.PHONY: clean whole package usb merge_setting all dist_clean
+.PHONY: clean release package usb merge_setting all dist_clean
 
-package: whole
+package: release
 usb: 
-	@echo use make whole to build your release firmware.
+	@echo use make release to build your release firmware.
 merge_setting: 
-	@echo use make whole to build your release firmware.
+	@echo use make release to build your release firmware.
 all: 
-	@echo use make whole to build your release firmware.
+	@echo use make release to build your release firmware.
 
-whole: $(SUBDIRS)
+release: $(SUBDIRS)
 
 $(SUBDIRS): $(OUTPUT_DIR)
 	@-mkdir -p $(OUTPUT_DIR)/$@
@@ -52,6 +52,6 @@ help:
 	@echo		flash_bootloader    - Flashing bootloader
 	@echo		flash_softdevice    - Flashing softdevice
 	@echo		flash_all           - Flashing bootloader softdevice and application with dfu setting
-	@echo		whole               - make all keyboards firmware in the keyboard folder
+	@echo		release             - make all keyboards firmware in the keyboard folder
 	@echo All targets starts with "flash" could has prefix "pyocd_" or "openocd", which \
 	means use pyocd  or openocd to flash chip. 
