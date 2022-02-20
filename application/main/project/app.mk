@@ -1,5 +1,5 @@
 PROJECT_NAME     := ble_app_hids_keyboard
-TARGETS          := nrf52_kbd
+TARGETS          := $(NRF_CHIP)_kbd
 
 ifndef OUTPUT_DIRECTORY
 	OUTPUT_DIRECTORY := _build
@@ -19,31 +19,41 @@ else
 	$(error cannot handle NRF_CHIP [$(NRF_CHIP)])
 endif
 
+NRF_KBD_FILE := $(OUTPUT_DIRECTORY)/$(TARGETS).hex
+
 ifndef NRF_KBD_NAME
-	NRF_KBD_NAME := $(OUTPUT_DIRECTORY)/nrf52_kbd_$(VERSION).hex
+	NRF_KBD_NAME := $(NRF_KBD_FILE)
+endif
+
+ifndef NRF_KBD_SETTING_NAME
+	NRF_KBD_SETTING_NAME := $(OUTPUT_DIRECTORY)/$(NRF_CHIP)_settings.hex
+endif
+
+ifndef NRF_BOOTLOADER_NAME
+	NRF_BOOTLOADER_NAME := $(OUTPUT_DIRECTORY)/$(NRF_CHIP)_bootloader.hex
 endif
 
 ifndef NRF_PACKAGE_NAME
-	NRF_PACKAGE_NAME := $(OUTPUT_DIRECTORY)/nrf52_kbd_$(VERSION).zip
+	NRF_PACKAGE_NAME := $(OUTPUT_DIRECTORY)/$(TARGETS).zip
 endif
 
 ifndef NRF_MERGE_SIGN_NAME
-	NRF_MERGE_SIGN_NAME := $(OUTPUT_DIRECTORY)/nrf52_kbd_sign.hex
+	NRF_MERGE_SIGN_NAME := $(OUTPUT_DIRECTORY)/$(TARGETS)_sign.hex
 endif
 
 ifndef NRF_MERGE_SD_NAME
-	NRF_MERGE_SD_NAME := $(OUTPUT_DIRECTORY)/nrf52_kbd_with_sd.hex
+	NRF_MERGE_SD_NAME := $(OUTPUT_DIRECTORY)/$(TARGETS)_with_sd.hex
 endif
 
 ifndef NRF_MERGE_SIGN_SD_NAME
-	NRF_MERGE_SIGN_SD_NAME := $(OUTPUT_DIRECTORY)/nrf52_kbd_sign_with_sd.hex
+	NRF_MERGE_SIGN_SD_NAME := $(OUTPUT_DIRECTORY)/$(TARGETS)_sign_with_sd.hex
 endif
 
 ifndef NRF_MERGE_ALL_NAME
-	NRF_MERGE_ALL_NAME := $(OUTPUT_DIRECTORY)/nrf52_all.hex
+	NRF_MERGE_ALL_NAME := $(OUTPUT_DIRECTORY)/$(NRF_CHIP)_all.hex
 endif
 
-$(OUTPUT_DIRECTORY)/nrf52_kbd.out: \
+$(OUTPUT_DIRECTORY)/$(TARGETS).out: \
 	LINKER_SCRIPT  := $(APP_PROJ_DIR)/$(LD_NAME)
 
 # Source files common to all targets
@@ -290,10 +300,10 @@ LDFLAGS += -Wl,--gc-sections
 # use newlib in nano version
 LDFLAGS += --specs=nano.specs
 
-nrf52_kbd: CFLAGS += -D__HEAP_SIZE=$(HEAP_SIZE)
-nrf52_kbd: CFLAGS += -D__STACK_SIZE=$(STACK_SIZE)
-nrf52_kbd: ASMFLAGS += -D__HEAP_SIZE=$(HEAP_SIZE)
-nrf52_kbd: ASMFLAGS += -D__STACK_SIZE=$(STACK_SIZE)
+$(TARGETS): CFLAGS += -D__HEAP_SIZE=$(HEAP_SIZE)
+$(TARGETS): CFLAGS += -D__STACK_SIZE=$(STACK_SIZE)
+$(TARGETS): ASMFLAGS += -D__HEAP_SIZE=$(HEAP_SIZE)
+$(TARGETS): ASMFLAGS += -D__STACK_SIZE=$(STACK_SIZE)
 
 # Add standard libraries at the very end of the linker input, after all objects
 # that may need symbols provided by these libraries.
@@ -302,12 +312,12 @@ LIB_FILES += -lc -lnosys -lm
 .PHONY: default help
 
 # Default target - first one defined
-default: nrf52_kbd
+default: $(TARGETS)
 
 # Print all targets that can be built
 help:
 	@echo following targets are available:
-	@echo		nrf52_kbd           - default： build KBD firmware
+	@echo		default           	- default： build KBD firmware
 	@echo		setting             - generate dfu setting
 	@echo		bootloader          - build BootLoader firmware
 	@echo		package             - pack firmware for DFU
@@ -329,44 +339,50 @@ include $(TEMPLATE_PATH)/Makefile.common
 
 $(foreach target, $(TARGETS), $(call define_target, $(target)))
 
-.PHONY: flash setting flash_setting flash_softdevice erase pyocd_flash pyocd_flash_softdevice pyocd_erase
+.PHONY: kbd flash setting flash_setting flash_softdevice erase pyocd_flash pyocd_flash_softdevice pyocd_erase
+
+ifeq ($(NRF_CHIP), nrf52832)
+kbd: default setting
+	@echo make kdb_sign $(NRF_MERGE_SIGN_NAME)
+	mergehex -m $(NRF_KBD_SETTING_NAME) $(NRF_KBD_FILE) -o $(NRF_MERGE_SIGN_NAME)
+else
+kbd: default
+	@echo Copy $(NRF_KBD_FILE) to $(NRF_KBD_NAME)
+	@cp -f $(NRF_KBD_FILE) $(NRF_KBD_NAME)
+endif
 
 # Flash the program
-kbd: default
-	@echo Move $(OUTPUT_DIRECTORY)/nrf52_kbd.hex to $(NRF_KBD_NAME)
-	cp -f $(OUTPUT_DIRECTORY)/nrf52_kbd.hex $(NRF_KBD_NAME)
-
 flash: default
-	@echo Flashing: $(OUTPUT_DIRECTORY)/nrf52_kbd.hex
-	nrfjprog -f nrf52 --program $(OUTPUT_DIRECTORY)/nrf52_kbd.hex --sectorerase
+	@echo Flashing: $(NRF_KBD_FILE)
+	nrfjprog -f nrf52 --program $(NRF_KBD_FILE) --sectorerase
 	nrfjprog -f nrf52 --reset
 
 pyocd_flash: default
-	@echo Flashing: $(OUTPUT_DIRECTORY)/nrf52_kbd.hex
-	pyocd flash -t nrf52 -e sector -f 2M $(OUTPUT_DIRECTORY)/nrf52_kbd.hex
+	@echo Flashing: $(NRF_KBD_FILE)
+	pyocd flash -t nrf52 -e sector -f 2M $(NRF_KBD_FILE)
 	pyocd cmd -t nrf52 -c reset
 
 # Generate and Flash the DFU setting
 setting: default
-	@echo Setting generate $(OUTPUT_DIRECTORY)/nrf52_settings.hex
-	nrfutil settings generate --family $(NRF_FAMILY) --application $(OUTPUT_DIRECTORY)/nrf52_kbd.hex --application-version 1 --bootloader-version 1 --bl-settings-version 2 $(OUTPUT_DIRECTORY)/nrf52_settings.hex
+	@echo Setting generate $(NRF_KBD_SETTING_NAME)
+	nrfutil settings generate --family $(NRF_FAMILY) --application $(NRF_KBD_FILE) --application-version 1 --bootloader-version 1 --bl-settings-version 2 $(NRF_KBD_SETTING_NAME)
 
 flash_setting: setting
-	@echo Flashing: $(OUTPUT_DIRECTORY)/nrf52_kbd.hex and $(OUTPUT_DIRECTORY)/nrf52_settings.hex
-	nrfjprog -f nrf52 --program $(OUTPUT_DIRECTORY)/nrf52_kbd.hex --sectorerase
-	nrfjprog -f nrf52 --program $(OUTPUT_DIRECTORY)/nrf52_settings.hex --sectorerase
+	@echo Flashing: $(NRF_KBD_FILE) and $(NRF_KBD_SETTING_NAME)
+	nrfjprog -f nrf52 --program $(NRF_KBD_FILE) --sectorerase
+	nrfjprog -f nrf52 --program $(NRF_KBD_SETTING_NAME) --sectorerase
 	nrfjprog -f nrf52 --reset
 
 pyocd_flash_setting: setting
-	@echo Flashing: $(OUTPUT_DIRECTORY)/nrf52_kbd.hex and $(OUTPUT_DIRECTORY)/nrf52_settings.hex
-	pyocd flash -t nrf52 -e sector -f 2M $(OUTPUT_DIRECTORY)/nrf52_kbd.hex
-	pyocd flash -t nrf52 -e sector -f 2M $(OUTPUT_DIRECTORY)/nrf52_settings.hex
+	@echo Flashing: $(NRF_KBD_FILE) and $(NRF_KBD_SETTING_NAME)
+	pyocd flash -t nrf52 -e sector -f 2M $(NRF_KBD_FILE)
+	pyocd flash -t nrf52 -e sector -f 2M $(NRF_KBD_SETTING_NAME)
 	pyocd cmd -t nrf52 -c reset
 
 # Package DFU firmware pack
 package: default
-	@echo Packing: $(OUTPUT_DIRECTORY)/nrf52_kbd.hex
-	nrfutil pkg generate --hw-version 52 --application-version 1 --application $(OUTPUT_DIRECTORY)/nrf52_kbd.hex \
+	@echo Packing: $(NRF_KBD_FILE)
+	nrfutil pkg generate --hw-version 52 --application-version 1 --application $(NRF_KBD_FILE) \
 	--sd-req $(SOFTDEVICE_VER) --key-file $(APP_PROJ_DIR)/private.key $(NRF_PACKAGE_NAME)
 
 # Flash softdevice
@@ -383,42 +399,48 @@ pyocd_flash_softdevice:
 # Merge Package for download
 merge_setting: setting
 	@echo Merging program with signature to $(NRF_MERGE_SIGN_NAME)
-	mergehex -m $(OUTPUT_DIRECTORY)/nrf52_settings.hex $(OUTPUT_DIRECTORY)/nrf52_kbd.hex -o $(NRF_MERGE_SIGN_NAME)
+	mergehex -m $(NRF_KBD_SETTING_NAME) $(NRF_KBD_FILE) -o $(NRF_MERGE_SIGN_NAME)
 
 merge_softdevice: default
 	@echo Merging program and SoftDevice $(SOFTDEVICE_NAME) to $(NRF_MERGE_SD_NAME)
-	mergehex -m $(SOFTDEVICE_PATH) $(OUTPUT_DIRECTORY)/nrf52_kbd.hex -o $(NRF_MERGE_SD_NAME)
+	mergehex -m $(SOFTDEVICE_PATH) $(NRF_KBD_FILE) -o $(NRF_MERGE_SD_NAME)
 
+ifeq ($(NRF_CHIP), nrf52832)
 all: setting bootloader
 	@echo Merging program, signature, bootloader and SoftDevice $(SOFTDEVICE_NAME) to $(NRF_MERGE_ALL_NAME)
-	mergehex -m $(SOFTDEVICE_PATH) $(OUTPUT_DIRECTORY)/nrf52_settings.hex $(OUTPUT_DIRECTORY)/nrf52_kbd.hex -o $(NRF_MERGE_SIGN_SD_NAME)
-	mergehex -m $(OUTPUT_DIRECTORY)/$(NRF_CHIP)_bootloader.hex $(NRF_MERGE_SIGN_SD_NAME) -o $(NRF_MERGE_ALL_NAME)
+	mergehex -m $(SOFTDEVICE_PATH) $(NRF_KBD_SETTING_NAME) $(NRF_KBD_FILE) -o $(NRF_MERGE_SIGN_SD_NAME)
+	mergehex -m $(NRF_BOOTLOADER_NAME) $(NRF_MERGE_SIGN_SD_NAME) -o $(NRF_MERGE_ALL_NAME)
+else
+all: default
+	@echo Merging SoftDevice $(SOFTDEVICE_NAME) to $(NRF_MERGE_ALL_NAME)
+	mergehex -m $(SOFTDEVICE_PATH) $(NRF_KBD_FILE) -o $(NRF_MERGE_ALL_NAME)
+endif
 
 flash_all: all
-	@echo Flashing: $(OUTPUT_DIRECTORY)/nrf52_all.hex
-	nrfjprog -f nrf52 --program $(OUTPUT_DIRECTORY)/nrf52_all.hex --sectorerase
+	@echo Flashing: $(NRF_MERGE_ALL_NAME)
+	nrfjprog -f nrf52 --program $(NRF_MERGE_ALL_NAME) --sectorerase
 	nrfjprog -f nrf52 --reset
 
 pyocd_flash_all: all
-	@echo Flashing: $(OUTPUT_DIRECTORY)/nrf52_all.hex
-	pyocd flash -t nrf52 -e sector -f 2M $(OUTPUT_DIRECTORY)/nrf52_all.hex
+	@echo Flashing: $(NRF_MERGE_ALL_NAME)
+	pyocd flash -t nrf52 -e sector -f 2M $(NRF_MERGE_ALL_NAME)
 	pyocd cmd -t nrf52 -c reset
 
 openocd_flash: default
-	@echo Flashing: $(OUTPUT_DIRECTORY)/nrf52_kbd.hex
-	$(OCD) -f $(OCD_CFG) -c "program $(OUTPUT_DIRECTORY)/nrf52_kbd.hex verify" -c reset -c exit
+	@echo Flashing: $(NRF_KBD_FILE)
+	$(OCD) -f $(OCD_CFG) -c "program $(NRF_KBD_FILE) verify" -c reset -c exit
 
 openocd_flash_setting: setting
-	@echo Flashing: $(OUTPUT_DIRECTORY)/nrf52_kbd.hex and $(OUTPUT_DIRECTORY)/nrf52_settings.hex
-	$(OCD) -f $(OCD_CFG) -c "program $(OUTPUT_DIRECTORY)/nrf52_settings.hex verify" -c "program $(OUTPUT_DIRECTORY)/nrf52_kbd.hex verify" -c reset -c exit
+	@echo Flashing: $(NRF_KBD_FILE) and $(NRF_KBD_SETTING_NAME)
+	$(OCD) -f $(OCD_CFG) -c "program $(NRF_KBD_SETTING_NAME) verify" -c "program $(NRF_KBD_FILE) verify" -c reset -c exit
 
 openocd_flash_softdevice:
 	@echo Flashing: $(SOFTDEVICE_PATH)
 	$(OCD) -f $(OCD_CFG) -c "program $(SOFTDEVICE_PATH) verify" -c reset -c exit
 
 openocd_flash_all: all
-	@echo Flashing: $(OUTPUT_DIRECTORY)/nrf52_all.hex
-	$(OCD) -f $(OCD_CFG) -c "program $(OUTPUT_DIRECTORY)/nrf52_all.hex verify" -c reset -c exit
+	@echo Flashing: $(NRF_MERGE_ALL_NAME)
+	$(OCD) -f $(OCD_CFG) -c "program $(NRF_MERGE_ALL_NAME) verify" -c reset -c exit
 
 # Erase chip
 erase:
