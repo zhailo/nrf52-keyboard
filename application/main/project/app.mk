@@ -317,11 +317,12 @@ default: $(TARGETS)
 # Print all targets that can be built
 help:
 	@echo following targets are available:
-	@echo		default           	- default： build KBD firmware
+	@echo		default           	- default: build KBD firmware
+	@echo		kbd	                - kbd: Depending on the CHIP generates KBD firmware
 	@echo		setting             - generate dfu setting
 	@echo		bootloader          - build BootLoader firmware
 	@echo		package             - pack firmware for DFU
-	@echo		all                 - merge bootloader softdevice and dfu setting with application
+	@echo		all                 - Depending on the CHIP generates whole firmware
 	@echo		erase               - erase the chip
 	@echo		merge_setting       - merge dfu setting with application
 	@echo		merge_softdevice    - merge softdevice with application
@@ -329,8 +330,7 @@ help:
 	@echo		flash_setting       - Flashing KBD firmware and dfu setting
 	@echo		flash_bootloader    - Flashing bootloader
 	@echo		flash_softdevice    - Flashing softdevice
-	@echo		flash_all           - Flashing bootloader softdevice and application with dfu setting
-	@echo		whole               - make all keyboards firmware in the keyboard folder
+	@echo		flash_all           - Flashing whole firmware
 	@echo All targets starts with "flash" could has prefix "pyocd_" or "openocd", which \
 	means use pyocd  or openocd to flash chip. 
 
@@ -347,8 +347,10 @@ kbd: default setting
 	mergehex -m $(NRF_KBD_SETTING_NAME) $(NRF_KBD_FILE) -o $(NRF_MERGE_SIGN_NAME)
 else
 kbd: default
-	@echo Copy $(NRF_KBD_FILE) to $(NRF_KBD_NAME)
+ifneq ($(NRF_KBD_FILE), $(NRF_KBD_NAME))
+	@echo make kdb $(NRF_KBD_NAME)
 	@cp -f $(NRF_KBD_FILE) $(NRF_KBD_NAME)
+endif
 endif
 
 # Flash the program
