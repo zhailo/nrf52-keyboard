@@ -501,6 +501,19 @@ __attribute__((weak)) void rgb_matrix_indicators_advanced_kb(uint8_t led_min, ui
 
 __attribute__((weak)) void rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) { }
 
+//根据指示灯与RGB灯状态控制RGB电源开关
+static void rgb_matrix_toggle_pwr(void)
+{
+    if (!rgb_matrix_config.indicators && !rgb_matrix_config.enable) {
+        ws2812_pwr_off();
+    } else if (rgb_matrix_config.indicators && !rgb_matrix_config.enable) {
+        ws2812_pwr_on();
+        power_save_reset();
+    } else if (rgb_matrix_config.enable) {
+        ws2812_pwr_on();
+    }
+}
+
 void rgb_matrix_init(void)  //need mod
 {
     rgb_matrix_driver.init();  //调用rgb_matrix_driver中init函数，当前ws2812中为空
@@ -528,11 +541,23 @@ void rgb_matrix_init(void)  //need mod
     }
 //    eeconfig_debug_rgb_matrix(); // display current eeprom values
     ws2812_pwr_init();
-    if (rgb_matrix_config.enable) {
-        ws2812_pwr_on();
-    } else {
-        ws2812_pwr_off();
-    }
+    rgb_matrix_toggle_pwr();
+}
+
+//休眠关机时调用关闭RGB
+void rgb_matrix_sleep_prepare(void)  //need mod
+{
+    // 禁用RGB MATRIX
+    rgb_matrix_disable_noeeprom();
+    wait_ms(1);
+    ws2812_pwr_deinit();
+}
+
+//指示灯是否启用开关
+void rgb_matrix_toggle_indicator(void)  //need mod
+{
+    rgb_matrix_config.indicators ^= 1;
+    rgb_matrix_toggle_pwr();
 }
 
 void rgb_matrix_set_suspend_state(bool state)
@@ -551,11 +576,7 @@ bool rgb_matrix_get_suspend_state(void) { return suspend_state; }
 void rgb_matrix_toggle_eeprom_helper(bool write_to_eeprom) //need mod
 {
     rgb_matrix_config.enable ^= 1;
-    if (rgb_matrix_config.enable) {
-        ws2812_pwr_on();
-    } else {
-        ws2812_pwr_off();
-    }
+    rgb_matrix_toggle_pwr();
     rgb_task_state = STARTING;
     if (write_to_eeprom) {
         eeconfig_update_rgb_matrix();
@@ -572,7 +593,7 @@ void rgb_matrix_enable(void) //need mod
 
 void rgb_matrix_enable_noeeprom(void) //need mod
 {
-    ws2812_pwr_on();
+    rgb_matrix_toggle_pwr();
     if (!rgb_matrix_config.enable)
         rgb_task_state = STARTING;
     rgb_matrix_config.enable = 1;
@@ -590,11 +611,11 @@ void rgb_matrix_disable_noeeprom(void) //need mod
         rgb_task_state = STARTING;
     rgb_matrix_config.enable = 0;
     wait_ms(10);
-    ws2812_pwr_off();
+    rgb_matrix_toggle_pwr();
 }
 
-uint8_t rgb_matrix_is_enabled(void) { return rgb_matrix_config.enable; }
-uint8_t rgb_matrix_is_indicator(void) { return rgb_matrix_config.indicators; }
+bool rgb_matrix_is_enabled(void) { return rgb_matrix_config.enable; }
+bool rgb_matrix_is_indicator(void) { return rgb_matrix_config.indicators; }
 
 void rgb_matrix_mode_eeprom_helper(uint8_t mode, bool write_to_eeprom)
 {
@@ -701,22 +722,6 @@ void rgb_matrix_decrease_speed(void) { rgb_matrix_decrease_speed_helper(true); }
 led_flags_t rgb_matrix_get_flags(void) { return rgb_matrix_config.flags; }
 
 void rgb_matrix_set_flags(led_flags_t flags) { rgb_matrix_config.flags = flags; }
-
-//休眠关机时调用关闭RGB
-void rgb_matrix_sleep_prepare(void)  //need mod
-{
-    // 禁用RGB MATRIX
-    rgb_matrix_disable_noeeprom();
-    wait_ms(1);
-    ws2812_pwr_deinit();
-}
-
-//指示灯是否启用开关
-void rgb_matrix_toggle_indicator(void)  //need mod
-{
-    rgb_matrix_config.indicators ^= 1;
-    power_save_reset();
-}
 
 static void status_rgb_matrix_evt_handler(enum user_event event, void* arg) //need mod
 {
