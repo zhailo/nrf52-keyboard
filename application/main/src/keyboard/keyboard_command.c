@@ -258,7 +258,7 @@ static bool command_common(uint8_t code)
 #ifdef RGBLIGHT_ENABLE
         rgblight_disable_noeeprom();
 #endif
-        app_timer_start(command_run_timer, APP_TIMER_TICKS(1000), (void*)(uint32_t)COMMAND_SLEEP);
+        app_timer_start(command_run_timer, APP_TIMER_TICKS(200), (void*)(uint32_t)COMMAND_SLEEP);
         break;
     case KC_BSPC:
     case KC_GRV:
@@ -267,7 +267,7 @@ static bool command_common(uint8_t code)
 #ifdef RGBLIGHT_ENABLE
         rgblight_disable_noeeprom();
 #endif
-        app_timer_start(command_run_timer, APP_TIMER_TICKS(1000), (void*)(uint32_t)COMMAND_SYSTEMOFF);
+        app_timer_start(command_run_timer, APP_TIMER_TICKS(200), (void*)(uint32_t)COMMAND_SYSTEMOFF);
         break;
     case KC_H:
         //输出电量
