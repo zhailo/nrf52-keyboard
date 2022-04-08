@@ -123,7 +123,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define UART_BAUDRATE NRF_UART_BAUDRATE_115200 // 通信波特率，请不要修改
 
 // 电量检测配置
-#define BATTERY_ADC_PIN NRF_SAADC_INPUT_AIN0 // 电量检测引脚 Pin 2
+#define BATTERY_ADC_PIN NRF_SAADC_INPUT_AIN2 // 电量检测引脚 Pin 4
 
 // 充电检测配置
 //#define PIN_CHARGING !UCC1
