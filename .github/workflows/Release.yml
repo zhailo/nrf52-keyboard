@@ -110,7 +110,7 @@ jobs:
       run: |
         cd ${{ github.workspace }}/cmsis-dap-flasher
         # 替换固件版本信息
-        sed -i 's/20220116-11dd5b41/${{ env.BUILDTIME }}-${{ env.VERSION }}/g' 开始烧录.bat
+        sed -i 's/yyyymmdd-xxxxxxxx/${{ env.BUILDTIME }}-${{ env.VERSION }}/g' 开始烧录.bat
         # 转换成Windows换行符
         sed -i ':label;N;s/\n/*#/;b label' 开始烧录.bat
         sed -i 's/*#/\r\n/g' 开始烧录.bat
