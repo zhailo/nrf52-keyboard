@@ -26,7 +26,6 @@ release: $(SUBDIRS)
 $(SUBDIRS): $(OUTPUT_DIR)
 	@-mkdir -p $(OUTPUT_DIR)/$@
 	@make -C $@ release OUTPUT_DIRECTORY=../$(OUTPUT_DIR)/$@ BUILD_PREFIX=$(BUILD_PREFIX)-$@
-	@make -C $@ release NRF_CHIP=nrf52811 OUTPUT_DIRECTORY=../$(OUTPUT_DIR)/$@ BUILD_PREFIX=$(BUILD_PREFIX)-$@
 
 $(OUTPUT_DIR):
 	@-mkdir -p $(OUTPUT_DIR)
