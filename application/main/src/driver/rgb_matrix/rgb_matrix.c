@@ -554,11 +554,16 @@ void rgb_matrix_sleep_prepare(void)  //need mod
 }
 
 //指示灯是否启用开关
-void rgb_matrix_toggle_indicator(void)  //need mod
+void rgb_matrix_toggle_indicator_eeprom_helper(bool write_to_eeprom)
 {
     rgb_matrix_config.indicators ^= 1;
     rgb_matrix_toggle_pwr();
+    if (write_to_eeprom) {
+        eeconfig_update_rgb_matrix();
+    }
 }
+void rgb_matrix_toggle_indicator_noeeprom(void) { rgb_matrix_toggle_indicator_eeprom_helper(false); }
+void rgb_matrix_toggle_indicator(void) { rgb_matrix_toggle_indicator_eeprom_helper(true); }
 
 void rgb_matrix_set_suspend_state(bool state)
 {
