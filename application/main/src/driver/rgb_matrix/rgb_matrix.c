@@ -506,7 +506,7 @@ static void rgb_matrix_toggle_pwr(void)
 {
     if (!rgb_matrix_config.indicators && !rgb_matrix_config.enable) {
         ws2812_pwr_off();
-    } else if (rgb_matrix_config.indicators && !rgb_matrix_config.enable) {
+    } else if (rgb_matrix_config.indicators) {
         ws2812_pwr_on();
         power_save_reset();
     } else if (rgb_matrix_config.enable) {

@@ -151,11 +151,9 @@ void ws2812_pwr_init(void)
 {
 #ifdef RGB_PWR_PIN
     nrf_gpio_cfg_output(RGB_PWR_PIN);
-    powered = true;
 #endif
 #ifdef RGB_PWR_PIN_REVERSE
     nrf_gpio_cfg_output(RGB_PWR_PIN_REVERSE);
-    powered = false;
 #endif
 }
 
@@ -205,5 +203,4 @@ void ws2812_pwr_off(void)
 bool ws2812_is_powered(void)
 {
     return powered;
-    powered = false;
 }
